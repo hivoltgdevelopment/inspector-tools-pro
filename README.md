@@ -1,6 +1,9 @@
 # Inspector Tools Pro
 
-Professional property inspection tool for mobile devices.
+Inspector Tools Pro is a Progressive Web App designed for professional home-watch inspectors.
+It supports voice-to-form entry (English and Spanish), dynamic prompts per property type,
+photo and video capture with timestamp and geo-tag, and offline-ready storage so
+inspections can be completed without a network connection.
 
 ## GitHub Pages Deployment
 
