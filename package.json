@@ -7,8 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "build:gh-pages": "vite build --base=/inspector-tools/",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npx gh-pages -d dist"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
