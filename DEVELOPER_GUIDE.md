@@ -1,0 +1,186 @@
+# Inspector Tools Pro - SMS Consent System Developer Guide
+
+## Overview
+This guide provides detailed instructions for developers working with the SMS consent management system in Inspector Tools Pro. The system ensures Twilio compliance and maintains audit trails for SMS marketing consent.
+
+## System Architecture
+
+### Frontend Components
+- `SMSConsentForm.tsx` - User-facing consent collection form
+- `ConsentAdmin.tsx` - Admin dashboard for managing consent records
+- `SMSAuth.tsx` - SMS authentication with consent integration
+
+### Backend Functions
+- `save-sms-consent` - Supabase Edge Function for storing consent data
+- `export-consent-data` - Supabase Edge Function for CSV export (Twilio compliant)
+
+### Database
+- `sms_consent` table - Stores all consent records with metadata
+
+## What You Can Safely Modify
+
+### Styling & UI
+✅ **Safe to Change:**
+- CSS classes and Tailwind styling
+- Form layout and visual design
+- Button colors and typography
+- Loading states and animations
+
+### Form Fields
+✅ **Safe to Add:**
+- Additional optional fields (company, preferences)
+- Custom validation messages
+- Form submission feedback
+
+### Admin Interface
+✅ **Safe to Customize:**
+- Search and filter options
+- Pagination settings
+- Display columns and formatting
+- Export filename format
+
+## What Must NOT Be Changed
+
+### Core Consent Data
+❌ **DO NOT MODIFY:**
+- Required fields: name, phone, consent status
+- Timestamp format and timezone handling
+- IP address and user agent capture
+- Consent checkbox validation logic
+
+### Database Schema
+❌ **CRITICAL - DO NOT CHANGE:**
+```sql
+-- These fields are required for Twilio compliance
+- created_at (timestamp)
+- full_name (text)
+- phone_number (text) 
+- consent_given (boolean)
+- ip_address (text)
+- user_agent (text)
+```
+
+### Export Function
+❌ **DO NOT MODIFY:**
+- CSV headers and field order
+- Consent=true filtering logic
+- Timestamp format in exports
+- File naming convention for audits
+
+## Security Requirements
+
+### Authentication
+- Admin interface requires proper authentication
+- Use Supabase RLS policies for data protection
+- Implement session management
+
+### Data Protection
+- Store consent records securely
+- Use HTTPS for all consent-related pages
+- Implement proper input sanitization
+- Log access to consent records
+
+### Privacy Compliance
+- Include privacy policy links
+- Implement data retention policies
+- Provide opt-out mechanisms
+- Maintain audit trails
+
+## Configuration Settings
+
+### Environment Variables
+```typescript
+// These should be configured in Supabase secrets
+TWILIO_ACCOUNT_SID
+TWILIO_AUTH_TOKEN
+TWILIO_PHONE_NUMBER
+```
+
+### Business Settings
+Update these in your application:
+- Business name for exports
+- Toll-free number display
+- Privacy policy URL
+- Terms of service URL
+
+## Testing Checklist
+
+### Before Production
+- [ ] Test consent form submission
+- [ ] Verify data appears in admin dashboard
+- [ ] Test CSV export functionality
+- [ ] Confirm only "consent=true" records export
+- [ ] Validate timestamp accuracy
+- [ ] Test search and filter functions
+- [ ] Verify mobile responsiveness
+- [ ] Check privacy policy links
+- [ ] Test opt-out functionality
+
+### Security Audit
+- [ ] Admin authentication works
+- [ ] RLS policies prevent unauthorized access
+- [ ] Input validation prevents injection
+- [ ] HTTPS enforced on all pages
+- [ ] Session management secure
+
+## Integration Points
+
+### SMS Authentication
+The consent system integrates with SMS auth:
+```typescript
+// Link to consent form from SMS auth
+<Link to="/sms-consent">Complete SMS Consent</Link>
+```
+
+### User Dashboard
+Access consent admin via Settings:
+```typescript
+// Admin tab in Settings component
+<TabsContent value="consent-admin">
+  <ConsentAdmin />
+</TabsContent>
+```
+
+## Maintenance
+
+### Regular Tasks
+- Monitor consent record growth
+- Export records for compliance audits
+- Review and update privacy policies
+- Clean up old test data
+
+### Backup Strategy
+- Regular database backups
+- Export consent data monthly
+- Store exports in secure location
+- Document retention periods
+
+## Troubleshooting
+
+### Common Issues
+1. **Form not submitting**: Check network connectivity and function deployment
+2. **Export empty**: Verify consent records exist with consent_given=true
+3. **Admin access denied**: Check authentication and RLS policies
+4. **Missing timestamps**: Ensure timezone handling in edge functions
+
+### Support Resources
+- Supabase documentation for edge functions
+- Twilio compliance guidelines
+- React component debugging
+- Database query optimization
+
+## Compliance Notes
+
+### Twilio Requirements
+- Maintain proof of consent for all SMS recipients
+- Include opt-out instructions in messages
+- Provide audit trail for regulatory review
+- Store consent with timestamp and IP
+
+### TCPA Compliance
+- Clear consent language required
+- Opt-in must be explicit (checkbox)
+- Provide easy opt-out mechanism
+- Maintain detailed records
+
+This system is designed to meet Twilio and TCPA compliance requirements. Any modifications should preserve these compliance features.

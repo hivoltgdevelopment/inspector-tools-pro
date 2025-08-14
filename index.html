@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/placeholder.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <link rel="preload" href="/src/main.tsx" as="script" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <title>Inspector Tools Pro - Professional Property Inspection</title>
+    <meta name="description" content="Streamline your property inspections with Inspector Tools Pro. Capture photos, generate reports, and manage properties from your mobile device. Perfect for home inspectors, property managers, and real estate professionals." />
+    <meta name="theme-color" content="#2563eb" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Google Play Store / Android optimizations -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Inspector Pro" />
+    
+    <!-- Apple-specific PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Inspector Pro" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152.png" />
+    
+    <!-- iOS Safari specific optimizations -->
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- Android Chrome specific -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#2563eb" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1e40af" />
+    
+    <!-- Microsoft Store / Windows PWA optimizations -->
+    <meta name="msapplication-TileColor" content="#1e40af" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    <meta name="msapplication-starturl" content="/" />
+    <meta name="msapplication-navbutton-color" content="#1e40af" />
+    <meta name="msapplication-window" content="width=1024;height=768" />
+    <meta name="msapplication-task" content="name=New Inspection;action-uri=/inspect/new;icon-uri=/icon-96.png" />
+    <meta name="msapplication-task" content="name=View Reports;action-uri=/reports;icon-uri=/icon-96.png" />
+    
+    <!-- Windows 10/11 specific -->
+    <!-- Simplified Windows tile references -->
+    <meta name="msapplication-square150x150logo" content="/icon-96.png" />
+    <meta name="msapplication-square310x310logo" content="/icon-512.png" />
+    
+    <!-- Edge specific optimizations -->
+    <meta name="msapplication-tooltip" content="Inspector Tools Pro - Professional Property Inspection" />
+    <meta name="application-name" content="Inspector Tools Pro" />
+    
+    <!-- Windows Hello / WebAuthn support -->
+    <meta name="supported-color-schemes" content="light dark" />
+    <meta name="color-scheme" content="light dark" />
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https:;" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <!-- GitHub Pages SPA routing support -->
+    <script type="text/javascript">
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
+  </body>
+</html>

@@ -1,0 +1,48 @@
+{
+  "packageId": "com.inspectortools.pro",
+  "name": "Inspector Tools Pro",
+  "launcherName": "Inspector Pro",
+  "displayMode": "standalone",
+  "orientation": "default",
+  "themeColor": "#2563eb",
+  "backgroundColor": "#ffffff",
+  "startUrl": "/",
+  "iconUrl": "https://inspector-tools-pro.netlify.app/icon-512.png",
+  "maskableIconUrl": "https://inspector-tools-pro.netlify.app/icon-512.png",
+  "monochromeIconUrl": "https://inspector-tools-pro.netlify.app/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "inspector-tools-key"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "New Inspection",
+      "shortName": "Inspect",
+      "url": "/inspection",
+      "icons": [
+        {
+          "src": "https://inspector-tools-pro.netlify.app/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://inspector-tools-pro.netlify.app/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": {
+      "enabled": true
+    },
+    "playBilling": {
+      "enabled": false
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableNotifications": true
+}
