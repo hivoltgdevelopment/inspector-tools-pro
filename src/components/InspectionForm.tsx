@@ -20,15 +20,22 @@ const propertyPrompts: Record<string, string[]> = {
 
 const STORAGE_KEY_PREFIX = 'inspection-';
 
+interface MediaEntry {
+  url: string;
+  type: string;
+  timestamp: number;
+  coords?: { lat: number; lon: number };
+  revoke: () => void;
+}
+
 export default function InspectionForm() {
   const [propertyType, setPropertyType] = useState<string>('single');
   const [language, setLanguage] = useState<string>('en-US');
   const [responses, setResponses] = useState<Record<string, string>>({});
   const [recordingPrompt, setRecordingPrompt] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
-  const [media, setMedia] = useState<
-    { url: string; type: string; timestamp: number; coords?: { lat: number; lon: number } }[]
-  >([]);
+  const [media, setMedia] = useState<MediaEntry[]>([]);
+  const mediaRef = useRef<MediaEntry[]>([]);
   const [online, setOnline] = useState<boolean>(navigator.onLine);
   const [geoError, setGeoError] = useState<string | null>(null);
 
@@ -92,6 +99,7 @@ export default function InspectionForm() {
     const file = event.target.files?.[0];
     if (!file) return;
     const url = URL.createObjectURL(file);
+    const revoke = () => URL.revokeObjectURL(url);
     const timestamp = Date.now();
     let coords: { lat: number; lon: number } | undefined;
     if (navigator.geolocation) {
@@ -111,8 +119,24 @@ export default function InspectionForm() {
     } else {
       setGeoError("Location data couldn't be retrieved");
     }
-    setMedia((m) => [...m, { url, type: file.type, timestamp, coords }]);
+    setMedia((m) => [...m, { url, type: file.type, timestamp, coords, revoke }]);
   };
+
+  useEffect(() => {
+    const prev = mediaRef.current;
+    prev.forEach((item) => {
+      if (!media.includes(item)) {
+        item.revoke();
+      }
+    });
+    mediaRef.current = media;
+  }, [media]);
+
+  useEffect(() => {
+    return () => {
+      mediaRef.current.forEach((item) => item.revoke());
+    };
+  }, []);
 
   const prompts = propertyPrompts[propertyType];
 
