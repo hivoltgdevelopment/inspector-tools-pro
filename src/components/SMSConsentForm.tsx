@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { isValidPhone } from '@/lib/phone';
 
 export default function SMSConsentForm() {
   const [name, setName] = useState('');
@@ -14,6 +15,11 @@ export default function SMSConsentForm() {
     setSuccess(null);
     if (!consent) {
       setError('You must explicitly consent to receive SMS messages.');
+      return;
+    }
+
+    if (!isValidPhone(phone)) {
+      setError('Please enter a valid phone number in E.164 format.');
       return;
     }
 
