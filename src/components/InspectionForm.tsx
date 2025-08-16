@@ -1,5 +1,26 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+// Minimal typings for the Web Speech API
+interface SpeechRecognitionEvent extends Event {
+  results: {
+    [index: number]: {
+      [index: number]: {
+        transcript: string;
+      };
+    };
+  };
+}
+
+interface SpeechRecognition {
+  lang: string;
+  interimResults: boolean;
+  maxAlternatives: number;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+}
+
 const propertyPrompts: Record<string, string[]> = {
   single: [
     'Check exterior doors',
@@ -33,7 +54,7 @@ export default function InspectionForm() {
   const [language, setLanguage] = useState<string>('en-US');
   const [responses, setResponses] = useState<Record<string, string>>({});
   const [recordingPrompt, setRecordingPrompt] = useState<string | null>(null);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const [media, setMedia] = useState<MediaEntry[]>([]);
   const mediaRef = useRef<MediaEntry[]>([]);
   const [online, setOnline] = useState<boolean>(navigator.onLine);
@@ -71,11 +92,11 @@ export default function InspectionForm() {
       alert('Speech recognition not supported in this browser');
       return;
     }
-    const recognition = new SpeechRecognition();
+    const recognition: SpeechRecognition = new SpeechRecognition();
     recognition.lang = language;
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
       setResponses((r) => ({
         ...r,
