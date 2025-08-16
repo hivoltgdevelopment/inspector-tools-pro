@@ -30,6 +30,7 @@ export default function InspectionForm() {
     { url: string; type: string; timestamp: number; coords?: { lat: number; lon: number } }[]
   >([]);
   const [online, setOnline] = useState<boolean>(navigator.onLine);
+  const [geoError, setGeoError] = useState<string | null>(null);
 
   // Load saved responses when property type changes
   useEffect(() => {
@@ -102,9 +103,13 @@ export default function InspectionForm() {
           lat: position.coords.latitude,
           lon: position.coords.longitude,
         };
-      } catch {
-        // ignore geolocation errors
+        setGeoError(null);
+      } catch (error) {
+        console.error('Geolocation error:', error);
+        setGeoError("Location data couldn't be retrieved");
       }
+    } else {
+      setGeoError("Location data couldn't be retrieved");
     }
     setMedia((m) => [...m, { url, type: file.type, timestamp, coords }]);
   };
@@ -178,6 +183,9 @@ export default function InspectionForm() {
           capture="environment"
           onChange={handleMediaChange}
         />
+        {geoError && (
+          <p className="text-sm text-red-600">{geoError}</p>
+        )}
         <ul className="text-sm list-disc pl-4">
           {media.map((m, i) => (
             <li key={i}>
