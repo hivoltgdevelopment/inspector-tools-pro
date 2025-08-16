@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
+import { Toaster, toast } from 'sonner';
 import { supabase } from '../lib/supabase';
 
 type ConsentRecord = {
@@ -17,6 +20,8 @@ export default function ConsentAdmin() {
   const [status, setStatus] = useState<'all' | 'active' | 'revoked'>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<ConsentRecord | null>(null);
+  const [confirmRevoke, setConfirmRevoke] = useState<ConsentRecord | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -48,28 +53,30 @@ export default function ConsentAdmin() {
   });
 
   const viewRecord = (rec: ConsentRecord) => {
-    alert(
-      `Name: ${rec.full_name}\nPhone: ${rec.phone_number}\nConsent: ${
-        rec.consent_given ? 'yes' : 'no'
-      }\nCreated: ${rec.created_at}\nIP: ${rec.ip_address || ''}\nUser Agent: ${
-        rec.user_agent || ''
-      }`
-    );
+    setSelected(rec);
   };
 
-  const revoke = async (id: string) => {
-    if (!confirm('Revoke consent for this record?')) return;
+  const revoke = (rec: ConsentRecord) => {
+    setConfirmRevoke(rec);
+  };
+
+  const handleRevoke = async () => {
+    if (!confirmRevoke) return;
     const { error } = await supabase
       .from('sms_consent')
       .update({ consent_given: false })
-      .eq('id', id);
+      .eq('id', confirmRevoke.id);
     if (error) {
-      alert('Failed to revoke consent');
+      toast.error('Failed to revoke consent');
       return;
     }
     setRecords((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, consent_given: false } : r))
+      prev.map((r) =>
+        r.id === confirmRevoke.id ? { ...r, consent_given: false } : r
+      )
     );
+    toast.success('Consent revoked');
+    setConfirmRevoke(null);
   };
 
   const exportData = async () => {
@@ -80,7 +87,7 @@ export default function ConsentAdmin() {
       },
     });
     if (!response.ok) {
-      alert('Failed to export consent data');
+      toast.error('Failed to export consent data');
       return;
     }
     const blob = await response.blob();
@@ -102,6 +109,7 @@ export default function ConsentAdmin() {
 
   return (
     <div className="border rounded p-4">
+      <Toaster position="top-right" />
       <h2 className="font-bold mb-4">Consent Admin Dashboard</h2>
       <div className="flex items-center gap-2 mb-4">
         <input
@@ -153,7 +161,7 @@ export default function ConsentAdmin() {
                 </button>
                 {r.consent_given && (
                   <button
-                    onClick={() => revoke(r.id)}
+                    onClick={() => revoke(r)}
                     className="text-red-600 underline"
                   >
                     Revoke
@@ -171,6 +179,80 @@ export default function ConsentAdmin() {
           )}
         </tbody>
       </table>
+      {selected && (
+        <Dialog.Root
+          open={!!selected}
+          onOpenChange={(open) => !open && setSelected(null)}
+        >
+          <Dialog.Portal>
+            <Dialog.Overlay className="fixed inset-0 bg-black/50" />
+            <Dialog.Content className="fixed top-1/2 left-1/2 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 bg-white p-4 rounded shadow focus:outline-none">
+              <Dialog.Title className="font-bold mb-2">
+                Consent Details
+              </Dialog.Title>
+              <div className="text-sm space-y-1">
+                <p>
+                  <span className="font-medium">Name:</span> {selected.full_name}
+                </p>
+                <p>
+                  <span className="font-medium">Phone:</span> {selected.phone_number}
+                </p>
+                <p>
+                  <span className="font-medium">Consent:</span>{' '}
+                  {selected.consent_given ? 'yes' : 'no'}
+                </p>
+                <p>
+                  <span className="font-medium">Created:</span> {selected.created_at}
+                </p>
+                {selected.ip_address && (
+                  <p>
+                    <span className="font-medium">IP:</span> {selected.ip_address}
+                  </p>
+                )}
+                {selected.user_agent && (
+                  <p>
+                    <span className="font-medium">User Agent:</span> {selected.user_agent}
+                  </p>
+                )}
+              </div>
+              <div className="mt-4 flex justify-end">
+                <Dialog.Close className="px-3 py-1 border rounded">
+                  Close
+                </Dialog.Close>
+              </div>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+      )}
+      {confirmRevoke && (
+        <AlertDialog.Root
+          open={!!confirmRevoke}
+          onOpenChange={(open) => !open && setConfirmRevoke(null)}
+        >
+          <AlertDialog.Portal>
+            <AlertDialog.Overlay className="fixed inset-0 bg-black/50" />
+            <AlertDialog.Content className="fixed top-1/2 left-1/2 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 bg-white p-4 rounded shadow focus:outline-none">
+              <AlertDialog.Title className="font-bold">
+                Revoke Consent
+              </AlertDialog.Title>
+              <AlertDialog.Description className="mt-2 text-sm">
+                Are you sure you want to revoke consent for {confirmRevoke.full_name}?
+              </AlertDialog.Description>
+              <div className="mt-4 flex justify-end gap-2">
+                <AlertDialog.Cancel className="px-3 py-1 border rounded">
+                  Cancel
+                </AlertDialog.Cancel>
+                <AlertDialog.Action
+                  onClick={handleRevoke}
+                  className="px-3 py-1 border rounded bg-red-600 text-white"
+                >
+                  Revoke
+                </AlertDialog.Action>
+              </div>
+            </AlertDialog.Content>
+          </AlertDialog.Portal>
+        </AlertDialog.Root>
+      )}
     </div>
   );
 }
