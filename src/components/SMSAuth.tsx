@@ -39,8 +39,12 @@ export default function SMSAuth() {
     try {
       await recordConsentAndSend();
       setStage('otp');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Failed to send verification code. Please try again.';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -56,8 +60,12 @@ export default function SMSAuth() {
         throw error;
       }
       setStage('success');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Failed to verify code. Please try again.';
+      setError(message);
     } finally {
       setLoading(false);
     }

@@ -30,8 +30,12 @@ export default function SMSConsentForm() {
       const existing = JSON.parse(localStorage.getItem('sms_consent_records') || '[]');
       existing.push(record);
       localStorage.setItem('sms_consent_records', JSON.stringify(existing));
-    } catch {
-      // ignore localStorage errors
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Failed to store consent locally.';
+      setError(message);
     }
 
     try {
@@ -51,8 +55,12 @@ export default function SMSConsentForm() {
       setName('');
       setPhone('');
       setConsent(false);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Failed to save consent.';
+      setError(message);
     } finally {
       setLoading(false);
     }
