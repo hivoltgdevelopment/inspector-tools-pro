@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { isValidPhone } from '@/lib/phone';
 
 export default function SMSAuth() {
   const [phone, setPhone] = useState('');
@@ -33,6 +34,10 @@ export default function SMSAuth() {
     setError(null);
     if (!consent) {
       setError('You must consent to receive SMS messages.');
+      return;
+    }
+    if (!isValidPhone(phone)) {
+      setError('Please enter a valid phone number in E.164 format.');
       return;
     }
     setLoading(true);
