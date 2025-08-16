@@ -9,6 +9,7 @@
     "build:dev": "vite build --mode development",
     "build:gh-pages": "vite build --base=/inspector-tools/",
     "lint": "eslint .",
+    "test": "node --test",
     "preview": "vite preview",
     "deploy": "npx gh-pages -d dist"
   },
