@@ -52,6 +52,10 @@ npm install
 npm run dev
 ```
 
+#### Skipping SMS login during development
+
+Create a `.env` file and set `VITE_SKIP_AUTH=true` to bypass the SMS authentication flow and render the protected screens directly.
+
 ### Build
 ```bash
 npm run build        # Standard build
