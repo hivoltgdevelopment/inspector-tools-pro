@@ -21,22 +21,46 @@ interface SpeechRecognition {
   stop: () => void;
 }
 
-const propertyPrompts: Record<string, string[]> = {
-  single: [
-    'Check exterior doors',
-    'Inspect windows for damage',
-    'Review roof and gutters',
-  ],
-  condo: [
-    'Inspect entryway and lobby',
-    'Check balcony safety',
-    'Test appliances',
-  ],
-  commercial: [
-    'Check signage and lighting',
-    'Inspect parking area',
-    'Review HVAC system',
-  ],
+const propertyPrompts: Record<
+  string,
+  Record<'en' | 'es', string[]>
+> = {
+  single: {
+    en: [
+      'Check exterior doors',
+      'Inspect windows for damage',
+      'Review roof and gutters',
+    ],
+    es: [
+      'Verificar las puertas exteriores',
+      'Inspeccionar ventanas por daños',
+      'Revisar techo y canaletas',
+    ],
+  },
+  condo: {
+    en: [
+      'Inspect entryway and lobby',
+      'Check balcony safety',
+      'Test appliances',
+    ],
+    es: [
+      'Inspeccionar entrada y vestíbulo',
+      'Comprobar seguridad del balcón',
+      'Probar electrodomésticos',
+    ],
+  },
+  commercial: {
+    en: [
+      'Check signage and lighting',
+      'Inspect parking area',
+      'Review HVAC system',
+    ],
+    es: [
+      'Revisar señalización e iluminación',
+      'Inspeccionar área de estacionamiento',
+      'Revisar sistema HVAC',
+    ],
+  },
 };
 
 const STORAGE_KEY_PREFIX = 'inspection-';
@@ -84,6 +108,13 @@ export default function InspectionForm() {
       window.removeEventListener('offline', handleOnline);
     };
   }, []);
+
+  // Update recognition language when switching languages
+  useEffect(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.lang = language;
+    }
+  }, [language]);
 
   const startRecording = (prompt: string) => {
     const SpeechRecognition =
@@ -159,7 +190,8 @@ export default function InspectionForm() {
     };
   }, []);
 
-  const prompts = propertyPrompts[propertyType];
+  const langKey = language.startsWith('es') ? 'es' : 'en';
+  const prompts = propertyPrompts[propertyType][langKey];
 
   return (
     <div className="space-y-4">
