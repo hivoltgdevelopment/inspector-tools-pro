@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import InspectionForm from '@/components/InspectionForm';
@@ -40,5 +40,96 @@ describe('InspectionForm language switching', () => {
 
     // Recognition language should update
     expect(lastInstance?.lang).toBe('es-ES');
+  });
+});
+
+describe('InspectionForm features', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.restoreAllMocks();
+  });
+
+  it('switches prompts with property type and persists responses', async () => {
+    const user = userEvent.setup();
+    render(<InspectionForm />);
+
+    // Default prompt for single family
+    const firstTextarea = screen.getAllByRole('textbox')[0];
+    await user.type(firstTextarea, 'door ok');
+
+    await waitFor(() =>
+      expect(localStorage.getItem('inspection-single')).not.toBeNull()
+    );
+
+    expect(
+      JSON.parse(localStorage.getItem('inspection-single')!)
+    ).toEqual({ 'Check exterior doors': 'door ok' });
+
+    await user.selectOptions(screen.getByLabelText(/property type/i), 'condo');
+    expect(
+      await screen.findByText('Inspect entryway and lobby')
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole('textbox')[0]).toHaveValue('');
+
+    await user.selectOptions(screen.getByLabelText(/property type/i), 'single');
+    await waitFor(() =>
+      expect(screen.getAllByRole('textbox')[0]).toHaveValue('door ok')
+    );
+  });
+
+  it('records text via Web Speech API', async () => {
+    const user = userEvent.setup();
+
+    class MockRecognition {
+      lang = '';
+      interimResults = false;
+      maxAlternatives = 1;
+      onresult: ((event: any) => void) | null = null;
+      onend: (() => void) | null = null;
+      start = vi.fn();
+      stop = vi.fn();
+    }
+    let lastInstance: MockRecognition | null = null;
+    const recognitionMock = vi.fn(() => {
+      lastInstance = new MockRecognition();
+      return lastInstance;
+    });
+    (window as any).SpeechRecognition = recognitionMock;
+    (window as any).webkitSpeechRecognition = recognitionMock;
+
+    render(<InspectionForm />);
+
+    await user.click(screen.getAllByRole('button', { name: /speak/i })[0]);
+    expect(recognitionMock).toHaveBeenCalled();
+
+    lastInstance?.onresult?.({
+      results: [[{ transcript: 'recorded text' }]],
+    } as any);
+
+    expect(screen.getAllByRole('textbox')[0]).toHaveValue('recorded text');
+  });
+
+  it('uploads media and attaches geolocation', async () => {
+    const user = userEvent.setup();
+
+    const getCurrentPosition = vi.fn((success) =>
+      success({ coords: { latitude: 10, longitude: 20 } })
+    );
+    Object.defineProperty(global.navigator, 'geolocation', {
+      value: { getCurrentPosition },
+      configurable: true,
+    });
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+
+    render(<InspectionForm />);
+
+    const label = screen.getByText('Add Photo or Video');
+    const input = label.nextElementSibling as HTMLInputElement;
+    const file = new File(['hello'], 'test.png', { type: 'image/png' });
+    await user.upload(input, file);
+
+    expect(getCurrentPosition).toHaveBeenCalled();
+    expect(await screen.findByText(/10.00, 20.00/)).toBeInTheDocument();
   });
 });
