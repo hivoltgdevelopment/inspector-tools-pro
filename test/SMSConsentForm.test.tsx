@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import SMSConsentForm from '@/components/SMSConsentForm';
@@ -36,7 +36,7 @@ describe('SMSConsentForm', () => {
 
   it('shows error when request fails', async () => {
     const user = userEvent.setup();
-    global.fetch = vi.fn().mockResolvedValue({ ok: false } as Response);
+    global.fetch = vi.fn().mockRejectedValueOnce(new Error('boom'));
 
     render(<SMSConsentForm />);
 
@@ -45,6 +45,8 @@ describe('SMSConsentForm', () => {
     await user.click(screen.getByRole('checkbox'));
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
-    await screen.findByText('Failed to save consent');
+    expect(await screen.findByText('boom')).toBeInTheDocument();
+
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
   });
 });
