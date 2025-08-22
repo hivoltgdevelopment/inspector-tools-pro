@@ -27,7 +27,7 @@ describe('SMSAuth', () => {
 
     render(<SMSAuth />);
 
-    await user.type(screen.getByPlaceholderText('Phone number'), '1234567890');
+    await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
     await user.click(screen.getByRole('checkbox'));
     await user.click(screen.getByRole('button', { name: /send code/i }));
 
@@ -43,7 +43,7 @@ describe('SMSAuth', () => {
     const user = userEvent.setup();
     render(<SMSAuth />);
 
-    await user.type(screen.getByPlaceholderText('Phone number'), '1234567890');
+    await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
     await user.click(screen.getByRole('button', { name: /send code/i }));
 
     await screen.findByText('You must consent to receive SMS messages.');
@@ -56,7 +56,7 @@ describe('SMSAuth', () => {
 
     render(<SMSAuth />);
 
-    await user.type(screen.getByPlaceholderText('Phone number'), '1234567890');
+    await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
     await user.click(screen.getByRole('checkbox'));
     await user.click(screen.getByRole('button', { name: /send code/i }));
 

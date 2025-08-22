@@ -16,7 +16,7 @@ describe('SMSConsentForm', () => {
     render(<SMSConsentForm />);
 
     await user.type(screen.getByPlaceholderText('Full name'), 'John Doe');
-    await user.type(screen.getByPlaceholderText('Phone number'), '1234567890');
+    await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
     await user.click(screen.getByRole('checkbox'));
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
@@ -28,7 +28,7 @@ describe('SMSConsentForm', () => {
     render(<SMSConsentForm />);
 
     await user.type(screen.getByPlaceholderText('Full name'), 'John Doe');
-    await user.type(screen.getByPlaceholderText('Phone number'), '1234567890');
+    await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
     await screen.findByText('You must explicitly consent to receive SMS messages.');
@@ -41,7 +41,7 @@ describe('SMSConsentForm', () => {
     render(<SMSConsentForm />);
 
     await user.type(screen.getByPlaceholderText('Full name'), 'John Doe');
-    await user.type(screen.getByPlaceholderText('Phone number'), '1234567890');
+    await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
     await user.click(screen.getByRole('checkbox'));
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
