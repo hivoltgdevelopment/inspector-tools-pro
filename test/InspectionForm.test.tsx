@@ -106,7 +106,9 @@ describe('InspectionForm features', () => {
       results: [[{ transcript: 'recorded text' }]],
     } as any);
 
-    expect(screen.getAllByRole('textbox')[0]).toHaveValue('recorded text');
+    await waitFor(() =>
+      expect(screen.getAllByRole('textbox')[0]).toHaveValue('recorded text')
+    );
   });
 
   it('uploads media and attaches geolocation', async () => {
