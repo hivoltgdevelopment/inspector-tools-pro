@@ -50,7 +50,7 @@ describe('SMSConsentForm', () => {
 
     // Component should surface the canonical error message
     expect(
-      await screen.findByText('Failed to save consent')
+      await screen.findByText('Failed to save consent.')
     ).toBeInTheDocument();
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalled());

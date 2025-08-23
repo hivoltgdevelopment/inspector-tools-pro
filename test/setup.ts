@@ -10,10 +10,12 @@ beforeAll(() => {
   Object.defineProperty(global.URL, 'createObjectURL', {
     value: vi.fn(() => 'blob:mock-url'),
     configurable: true,
+    writable: true,
   });
   Object.defineProperty(global.URL, 'revokeObjectURL', {
     value: vi.fn(),
     configurable: true,
+    writable: true,
   });
 });
 
