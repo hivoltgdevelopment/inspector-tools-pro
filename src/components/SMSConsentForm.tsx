@@ -55,7 +55,7 @@ export default function SMSConsentForm() {
         body: JSON.stringify({ name, phone, consent: true }),
       });
       if (!res.ok) {
-        throw new Error('Failed to save consent');
+        throw new Error('Failed to save consent.');
       }
       setSuccess('Consent recorded successfully.');
       setName('');
