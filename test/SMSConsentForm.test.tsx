@@ -36,7 +36,10 @@ describe('SMSConsentForm', () => {
 
   it('shows error when request fails', async () => {
     const user = userEvent.setup();
-    global.fetch = vi.fn().mockRejectedValueOnce(new Error('boom'));
+    // Simulate non-ok response from backend
+    global.fetch = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false } as Response);
 
     render(<SMSConsentForm />);
 
@@ -45,7 +48,10 @@ describe('SMSConsentForm', () => {
     await user.click(screen.getByRole('checkbox'));
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
-    expect(await screen.findByText('boom')).toBeInTheDocument();
+    // Component should surface the canonical error message
+    expect(
+      await screen.findByText('Failed to save consent')
+    ).toBeInTheDocument();
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalled());
   });
