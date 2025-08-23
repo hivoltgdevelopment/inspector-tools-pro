@@ -60,6 +60,6 @@ describe('SMSAuth', () => {
     await user.click(screen.getByRole('checkbox'));
     await user.click(screen.getByRole('button', { name: /send code/i }));
 
-    await screen.findByText('sign in failed');
+    await screen.findByText(/failed to send verification code\. ?please try again/i);
   });
 });

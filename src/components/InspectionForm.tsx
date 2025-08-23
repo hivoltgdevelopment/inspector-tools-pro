@@ -203,8 +203,9 @@ export default function InspectionForm() {
       </div>
 
       <div className="space-y-2">
-        <label className="block font-medium">Property Type</label>
+        <label htmlFor="propertyType" className="block font-medium">Property Type</label>
         <select
+          id="propertyType"
           className="border rounded p-2 w-full"
           value={propertyType}
           onChange={(e) => setPropertyType(e.target.value)}
@@ -216,8 +217,9 @@ export default function InspectionForm() {
       </div>
 
       <div className="space-y-2">
-        <label className="block font-medium">Language</label>
+        <label htmlFor="language" className="block font-medium">Language</label>
         <select
+          id="language"
           className="border rounded p-2 w-full"
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
