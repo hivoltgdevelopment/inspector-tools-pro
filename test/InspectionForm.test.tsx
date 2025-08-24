@@ -26,7 +26,8 @@ describe('InspectionForm language switching', () => {
 
     render(<InspectionForm />);
 
-    // Start recording in default English
+    // Enable voice input and start recording in default English
+    await user.click(screen.getByLabelText(/enable voice input/i));
     await user.click(screen.getAllByRole('button', { name: /speak/i })[0]);
     expect(lastInstance?.lang).toBe('en-US');
 
@@ -99,6 +100,7 @@ describe('InspectionForm features', () => {
 
     render(<InspectionForm />);
 
+    await user.click(screen.getByLabelText(/enable voice input/i));
     await user.click(screen.getAllByRole('button', { name: /speak/i })[0]);
     expect(recognitionMock).toHaveBeenCalled();
 
@@ -169,4 +171,46 @@ describe('InspectionForm features', () => {
       ).not.toBeInTheDocument()
     );
   });
+
+  it('queues inspection form when offline and flushes when back online', async () => {
+    const user = userEvent.setup();
+
+    Object.defineProperty(window.navigator, 'onLine', {
+      value: false,
+      configurable: true,
+    });
+
+    render(<InspectionForm />);
+
+    const firstTextarea = screen.getAllByRole('textbox')[0];
+    await user.type(firstTextarea, 'offline text');
+    await user.click(screen.getByRole('button', { name: /submit inspection/i }));
+
+    expect(
+      await screen.findByText('Queued • syncs when online')
+    ).toBeInTheDocument();
+
+    Object.defineProperty(window.navigator, 'onLine', {
+      value: true,
+      configurable: true,
+    });
+    window.dispatchEvent(new Event('online'));
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText('Queued • syncs when online')
+      ).not.toBeInTheDocument()
+    );
+  });
+
+  it('only shows Speak buttons when voice input enabled', async () => {
+    const user = userEvent.setup();
+    render(<InspectionForm />);
+
+    expect(screen.queryByRole('button', { name: /speak/i })).not.toBeInTheDocument();
+
+    await user.click(screen.getByLabelText(/enable voice input/i));
+    expect(screen.getAllByRole('button', { name: /speak/i })).toHaveLength(3);
+  });
+main
 });
