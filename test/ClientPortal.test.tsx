@@ -1,5 +1,14 @@
 import { render, screen } from '@testing-library/react';
+codex/continue-implementation-of-feature-xdvitk
 import userEvent from '@testing-library/user-event';
+
+import userEvent from '@testing-library/user-event';
+
+codex/continue-implementation-of-feature-7okmdd
+import userEvent from '@testing-library/user-event';
+main
+main
+main
 import { vi } from 'vitest';
 import ClientPortal from '@/components/ClientPortal';
 import { supabase } from '@/lib/supabase';
@@ -14,6 +23,13 @@ vi.mock('@/lib/supabase', () => ({
 function mockReports(data = [{ id: '1', title: 'Report A' }]) {
   (supabase.auth.getUser as any).mockResolvedValue({ data: { user: { id: '123' } } });
   const eq = vi.fn().mockResolvedValue({ data, error: null });
+codex/continue-implementation-of-feature-xdvitk
+
+function mockReports() {
+  (supabase.auth.getUser as any).mockResolvedValue({ data: { user: { id: '123' } } });
+  const eq = vi.fn().mockResolvedValue({ data: [{ id: '1', title: 'Report A' }], error: null });
+main
+main
   const select = vi.fn().mockReturnValue({ eq });
   (supabase.from as any).mockReturnValue({ select });
 }
@@ -66,4 +82,7 @@ describe('ClientPortal UX', () => {
       )
     ).toBeInTheDocument();
   });
+codex/continue-implementation-of-feature-xdvitk
 });
+});
+main

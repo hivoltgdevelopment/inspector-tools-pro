@@ -114,5 +114,23 @@ export default defineConfig(({ mode }) => ({
     },
     sourcemap: false,
     minify: 'esbuild'
+codex/continue-implementation-of-feature-xdvitk
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['test/setupTests.ts'],
+    setupFiles: ['test/setupTests.ts'],
+
+    setupFiles: ['test/setupTests.ts'],
+
+  setupFiles: './test/setupTests.ts',
+
+main
+    env: {
+      VITE_SUPABASE_URL: 'https://example.com',
+      VITE_SUPABASE_ANON_KEY: 'anon-key'
+    }
+main
   }
 }));
