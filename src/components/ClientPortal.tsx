@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import PayInvoiceButton from './PayInvoiceButton';
 
+main
 type Report = {
   id: string;
   title: string;
@@ -10,8 +10,8 @@ type Report = {
 export default function ClientPortal() {
   const [reports, setReports] = useState<Report[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true';
 
+  main
   useEffect(() => {
     const load = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -37,10 +37,13 @@ export default function ClientPortal() {
       <h2 className="font-bold mb-2">My Reports</h2>
       <ul className="list-disc pl-6">
         {reports.map((r) => (
+codex/continue-implementation-of-feature-sphc6g
           <li key={r.id} className="mb-2">
             <div>{r.title}</div>
             {paymentsEnabled && <PayInvoiceButton reportId={r.id} />}
           </li>
+          <li key={r.id}>{r.title}</li>
+main
         ))}
       </ul>
     </div>

@@ -118,7 +118,12 @@ export default defineConfig(({ mode }) => ({
   test: {
     environment: 'jsdom',
     globals: true,
+codex/continue-implementation-of-feature-sphc6g
     setupFiles: ['test/setupTests.ts'],
+
+  setupFiles: './test/setupTests.ts',
+
+  main
     env: {
       VITE_SUPABASE_URL: 'https://example.com',
       VITE_SUPABASE_ANON_KEY: 'anon-key'

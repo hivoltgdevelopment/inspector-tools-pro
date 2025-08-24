@@ -49,9 +49,9 @@ describe('SMSConsentForm', () => {
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
     // Component should surface the canonical error message
-    expect(
-      await screen.findByText('Failed to save consent.')
-    ).toBeInTheDocument();
+    expect(await screen.findByText('Failed to save consent.')).toHaveTextContent(
+      'Failed to save consent.'
+    );
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalled());
   });

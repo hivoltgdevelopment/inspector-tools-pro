@@ -21,14 +21,17 @@ vi.mock('idb-keyval', () => {
 
 import * as idbKeyval from 'idb-keyval';
 
+main
 // Preserve any existing implementations so we can restore them after tests
 const originalCreateObjectURL = URL.createObjectURL;
 const originalRevokeObjectURL = URL.revokeObjectURL;
 
+codex/continue-implementation-of-feature-sphc6g
 beforeEach(() => {
   (idbKeyval as any)._store.clear();
 });
 
+main
 beforeAll(() => {
   // jsdom doesn't implement these APIs, so provide lightweight mocks
   Object.defineProperty(global.URL, 'createObjectURL', {
