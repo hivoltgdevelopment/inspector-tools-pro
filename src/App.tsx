@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import InspectionForm from './components/InspectionForm';
 import SMSAuth from './components/SMSAuth';
+import ConsentAdmin from './components/ConsentAdmin';
+import ClientPortal from './components/ClientPortal';
+import RequireRole from './components/RequireRole';
 import { supabase } from './lib/supabase';
 
 export default function App() {
@@ -23,17 +27,44 @@ export default function App() {
     };
   }, []);
 
-  if (skipAuth || authed) {
+  if (!skipAuth && !authed) {
     return (
       <div className="p-4">
-        <InspectionForm />
+        <SMSAuth />
       </div>
     );
   }
 
   return (
-    <div className="p-4">
-      <SMSAuth />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/admin/consent"
+          element={
+            <RequireRole roles={['admin']}>
+              <ConsentAdmin />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/portal"
+          element={
+            <RequireRole roles={['client']}>
+              <ClientPortal />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/"
+          element={
+            <RequireRole roles={['inspector']}>
+              <div className="p-4">
+                <InspectionForm />
+              </div>
+            </RequireRole>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }

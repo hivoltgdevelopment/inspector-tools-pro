@@ -1,0 +1,40 @@
+name: RC Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v1.2.3-rc.1)'
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate tag input
+        run: |
+          if [ -z "${{ github.event.inputs.tag }}" ]; then
+            echo "::error::tag input is required"
+            exit 1
+          fi
+
+      - name: Ensure gh CLI
+        run: |
+          if ! command -v gh > /dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y gh
+          fi
+          gh --version
+
+      - name: Verify npm and GitHub API access
+        run: |
+          npm ping
+          gh api -X GET rate_limit > /dev/null
+
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      # Additional release steps go here
