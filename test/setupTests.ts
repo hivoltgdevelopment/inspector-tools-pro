@@ -26,7 +26,7 @@ main
 const originalCreateObjectURL = URL.createObjectURL;
 const originalRevokeObjectURL = URL.revokeObjectURL;
 
-codex/continue-implementation-of-feature-sphc6g
+main
 beforeEach(() => {
   (idbKeyval as any)._store.clear();
 });

@@ -1,4 +1,7 @@
 import { render, screen } from '@testing-library/react';
+codex/continue-implementation-of-feature-7okmdd
+import userEvent from '@testing-library/user-event';
+main
 import { vi } from 'vitest';
 import ClientPortal from '@/components/ClientPortal';
 import { supabase } from '@/lib/supabase';
@@ -10,9 +13,14 @@ vi.mock('@/lib/supabase', () => ({
   },
 }));
 
+function mockReports(data = [{ id: '1', title: 'Report A' }]) {
+  (supabase.auth.getUser as any).mockResolvedValue({ data: { user: { id: '123' } } });
+  const eq = vi.fn().mockResolvedValue({ data, error: null });
+=======
 function mockReports() {
   (supabase.auth.getUser as any).mockResolvedValue({ data: { user: { id: '123' } } });
   const eq = vi.fn().mockResolvedValue({ data: [{ id: '1', title: 'Report A' }], error: null });
+main
   const select = vi.fn().mockReturnValue({ eq });
   (supabase.from as any).mockReturnValue({ select });
 }
@@ -37,3 +45,33 @@ describe('ClientPortal payments flag', () => {
     expect(screen.queryByText('Pay invoice')).not.toBeInTheDocument();
   });
 });
+
+describe('ClientPortal UX', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('filters reports by search input', async () => {
+    mockReports([
+      { id: '1', title: 'Roof Report' },
+      { id: '2', title: 'Basement Report' },
+    ]);
+    render(<ClientPortal />);
+    expect(await screen.findByText('Roof Report')).toBeInTheDocument();
+    const search = screen.getByPlaceholderText('Search reports...');
+    await userEvent.type(search, 'base');
+    expect(screen.queryByText('Roof Report')).not.toBeInTheDocument();
+    expect(screen.getByText('Basement Report')).toBeInTheDocument();
+  });
+
+  it('shows legal disclaimer', async () => {
+    mockReports();
+    render(<ClientPortal />);
+    expect(
+      await screen.findByText(
+        /inspection reports are provided for informational purposes/i
+      )
+    ).toBeInTheDocument();
+  });
+});
+main
