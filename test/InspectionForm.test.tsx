@@ -212,4 +212,5 @@ describe('InspectionForm features', () => {
     await user.click(screen.getByLabelText(/enable voice input/i));
     expect(screen.getAllByRole('button', { name: /speak/i })).toHaveLength(3);
   });
+main
 });

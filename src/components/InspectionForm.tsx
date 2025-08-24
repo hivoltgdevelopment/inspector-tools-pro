@@ -4,11 +4,14 @@ import {
   getQueuedItems,
   startUploadWorker,
 } from '@/lib/uploadQueue';
+
 import {
   enqueueForm,
   getQueuedForms,
   startFormWorker,
 } from '@/lib/formQueue';
+
+main
 
 // Minimal typings for the Web Speech API
 interface SpeechRecognitionEvent extends Event {
@@ -93,10 +96,13 @@ export default function InspectionForm() {
   const mediaRef = useRef<MediaEntry[]>([]);
   const [online, setOnline] = useState<boolean>(navigator.onLine);
   const [geoError, setGeoError] = useState<string | null>(null);
+
   const [queuedUploads, setQueuedUploads] = useState<number>(0);
   const [queuedForms, setQueuedForms] = useState<number>(0);
   const [voiceEnabled, setVoiceEnabled] = useState<boolean>(false);
 
+  const [queued, setQueued] = useState<number>(0);
+main
   const uploadFile = async (file: File) => {
     // TODO: integrate with backend upload endpoint
     return Promise.resolve();
@@ -106,6 +112,7 @@ export default function InspectionForm() {
     // TODO: integrate with backend submission endpoint
     return Promise.resolve();
   };
+main
 
   // Load saved responses when property type changes
   useEffect(() => {
@@ -133,6 +140,7 @@ export default function InspectionForm() {
   }, []);
 
   useEffect(() => {
+
     getQueuedItems().then((items) => setQueuedUploads(items.length));
     const stop = startUploadWorker(uploadFile, (count) => setQueuedUploads(count));
     return stop;
@@ -141,6 +149,10 @@ export default function InspectionForm() {
   useEffect(() => {
     getQueuedForms().then((items) => setQueuedForms(items.length));
     const stop = startFormWorker(submitFormData, (count) => setQueuedForms(count));
+
+    getQueuedItems().then((items) => setQueued(items.length));
+    const stop = startUploadWorker(uploadFile, (count) => setQueued(count));
+main
     return stop;
   }, []);
 
@@ -210,6 +222,7 @@ export default function InspectionForm() {
 
     if (!navigator.onLine) {
       await enqueueUpload(file);
+
       setQueuedUploads((q) => q + 1);
     } else {
       await uploadFile(file);
@@ -224,6 +237,12 @@ export default function InspectionForm() {
     } else {
       await submitFormData(data);
     }
+
+      setQueued((q) => q + 1);
+    } else {
+      await uploadFile(file);
+    }
+main
   };
 
   useEffect(() => {
@@ -250,7 +269,11 @@ export default function InspectionForm() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Inspection Form</h1>
         <div className="flex items-center gap-2">
+
           {queuedUploads + queuedForms > 0 && (
+
+          {queued > 0 && (
+main
             <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
               Queued • syncs when online
             </span>
