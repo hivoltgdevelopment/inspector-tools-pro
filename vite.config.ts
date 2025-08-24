@@ -114,6 +114,7 @@ export default defineConfig(({ mode }) => ({
     },
     sourcemap: false,
     minify: 'esbuild'
+codex/continue-implementation-of-feature-xdvitk
   },
   test: {
     environment: 'jsdom',
@@ -130,5 +131,6 @@ main
       VITE_SUPABASE_URL: 'https://example.com',
       VITE_SUPABASE_ANON_KEY: 'anon-key'
     }
+main
   }
 }));

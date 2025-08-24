@@ -4,12 +4,15 @@ import {
   getQueuedItems,
   startUploadWorker,
 } from '@/lib/uploadQueue';
+codex/continue-implementation-of-feature-xdvitk
 
+main
 import {
   enqueueForm,
   getQueuedForms,
   startFormWorker,
 } from '@/lib/formQueue';
+codex/continue-implementation-of-feature-xdvitk
 
 main
 
@@ -96,6 +99,19 @@ export default function InspectionForm() {
   const mediaRef = useRef<MediaEntry[]>([]);
   const [online, setOnline] = useState<boolean>(navigator.onLine);
   const [geoError, setGeoError] = useState<string | null>(null);
+  const [queuedUploads, setQueuedUploads] = useState<number>(0);
+  const [queuedForms, setQueuedForms] = useState<number>(0);
+  const [voiceEnabled, setVoiceEnabled] = useState<boolean>(false);
+
+  const uploadFile = async (file: File) => {
+    // TODO: integrate with backend upload endpoint
+    return Promise.resolve();
+  };
+
+  const submitFormData = async (data: any) => {
+    // TODO: integrate with backend submission endpoint
+    return Promise.resolve();
+  };
 
   const [queuedUploads, setQueuedUploads] = useState<number>(0);
   const [queuedForms, setQueuedForms] = useState<number>(0);
@@ -140,7 +156,9 @@ main
   }, []);
 
   useEffect(() => {
+codex/continue-implementation-of-feature-xdvitk
 
+main
     getQueuedItems().then((items) => setQueuedUploads(items.length));
     const stop = startUploadWorker(uploadFile, (count) => setQueuedUploads(count));
     return stop;
@@ -149,8 +167,8 @@ main
   useEffect(() => {
     getQueuedForms().then((items) => setQueuedForms(items.length));
     const stop = startFormWorker(submitFormData, (count) => setQueuedForms(count));
-
-    getQueuedItems().then((items) => setQueued(items.length));
+codex/continue-implementation-of-feature-xdvitk
+   getQueuedItems().then((items) => setQueued(items.length));
     const stop = startUploadWorker(uploadFile, (count) => setQueued(count));
 main
     return stop;
@@ -222,7 +240,9 @@ main
 
     if (!navigator.onLine) {
       await enqueueUpload(file);
+codex/continue-implementation-of-feature-xdvitk
 
+      main
       setQueuedUploads((q) => q + 1);
     } else {
       await uploadFile(file);
@@ -237,6 +257,7 @@ main
     } else {
       await submitFormData(data);
     }
+codex/continue-implementation-of-feature-xdvitk
 
       setQueued((q) => q + 1);
     } else {
@@ -269,6 +290,8 @@ main
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Inspection Form</h1>
         <div className="flex items-center gap-2">
+codex/continue-implementation-of-feature-xdvitk
+          {queuedUploads + queuedForms > 0 && (
 
           {queuedUploads + queuedForms > 0 && (
 

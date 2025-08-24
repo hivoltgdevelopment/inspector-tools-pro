@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+
+import PayInvoiceButton from './PayInvoiceButton';
+
+
 codex/continue-implementation-of-feature-nvnmmi
 import PayInvoiceButton from './PayInvoiceButton';
 
@@ -14,6 +18,11 @@ type Report = {
 export default function ClientPortal() {
   const [reports, setReports] = useState<Report[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const [query, setQuery] = useState('');
+  const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true';
+
+
 codex/continue-implementation-of-feature-nvnmmi
   const [query, setQuery] = useState('');
   const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true';
@@ -45,7 +54,7 @@ main
 codex/continue-implementation-of-feature-nvnmmi
 
 codex/continue-implementation-of-feature-7okmdd
-main
+ main
   const filtered = reports.filter((r) =>
     r.title.toLowerCase().includes(query.toLowerCase())
   );
@@ -72,6 +81,7 @@ main
         Inspection reports are provided for informational purposes only and do not
         constitute legal or financial advice.
       </p>
+
 codex/continue-implementation-of-feature-nvnmmi
   return (
     <div className="p-4">
