@@ -118,7 +118,7 @@ export default defineConfig(({ mode }) => ({
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: './test/setup.ts',
+    setupFiles: ['test/setupTests.ts'],
     env: {
       VITE_SUPABASE_URL: 'https://example.com',
       VITE_SUPABASE_ANON_KEY: 'anon-key'
