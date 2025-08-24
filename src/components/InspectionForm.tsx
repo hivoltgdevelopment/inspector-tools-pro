@@ -1,4 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
+import {
+  enqueueUpload,
+  getQueuedItems,
+  startUploadWorker,
+} from '@/lib/uploadQueue';
+import {
+  enqueueForm,
+  getQueuedForms,
+  startFormWorker,
+} from '@/lib/formQueue';
 
 // Minimal typings for the Web Speech API
 interface SpeechRecognitionEvent extends Event {
@@ -83,6 +93,19 @@ export default function InspectionForm() {
   const mediaRef = useRef<MediaEntry[]>([]);
   const [online, setOnline] = useState<boolean>(navigator.onLine);
   const [geoError, setGeoError] = useState<string | null>(null);
+  const [queuedUploads, setQueuedUploads] = useState<number>(0);
+  const [queuedForms, setQueuedForms] = useState<number>(0);
+  const [voiceEnabled, setVoiceEnabled] = useState<boolean>(false);
+
+  const uploadFile = async (file: File) => {
+    // TODO: integrate with backend upload endpoint
+    return Promise.resolve();
+  };
+
+  const submitFormData = async (data: any) => {
+    // TODO: integrate with backend submission endpoint
+    return Promise.resolve();
+  };
 
   // Load saved responses when property type changes
   useEffect(() => {
@@ -107,6 +130,18 @@ export default function InspectionForm() {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOnline);
     };
+  }, []);
+
+  useEffect(() => {
+    getQueuedItems().then((items) => setQueuedUploads(items.length));
+    const stop = startUploadWorker(uploadFile, (count) => setQueuedUploads(count));
+    return stop;
+  }, []);
+
+  useEffect(() => {
+    getQueuedForms().then((items) => setQueuedForms(items.length));
+    const stop = startFormWorker(submitFormData, (count) => setQueuedForms(count));
+    return stop;
   }, []);
 
   // Update recognition language when switching languages
@@ -172,6 +207,23 @@ export default function InspectionForm() {
       setGeoError("Location data couldn't be retrieved");
     }
     setMedia((m) => [...m, { url, type: file.type, timestamp, coords, revoke }]);
+
+    if (!navigator.onLine) {
+      await enqueueUpload(file);
+      setQueuedUploads((q) => q + 1);
+    } else {
+      await uploadFile(file);
+    }
+  };
+
+  const handleSubmit = async () => {
+    const data = { propertyType, language, responses };
+    if (!navigator.onLine) {
+      await enqueueForm(data);
+      setQueuedForms((q) => q + 1);
+    } else {
+      await submitFormData(data);
+    }
   };
 
   useEffect(() => {
@@ -197,9 +249,16 @@ export default function InspectionForm() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Inspection Form</h1>
-        <span className={online ? 'text-green-600' : 'text-red-600'}>
-          {online ? 'Online' : 'Offline'}
-        </span>
+        <div className="flex items-center gap-2">
+          {queuedUploads + queuedForms > 0 && (
+            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+              Queued • syncs when online
+            </span>
+          )}
+          <span className={online ? 'text-green-600' : 'text-red-600'}>
+            {online ? 'Online' : 'Offline'}
+          </span>
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -229,6 +288,18 @@ export default function InspectionForm() {
         </select>
       </div>
 
+      <div className="flex items-center gap-2">
+        <input
+          id="voice"
+          type="checkbox"
+          checked={voiceEnabled}
+          onChange={(e) => setVoiceEnabled(e.target.checked)}
+        />
+        <label htmlFor="voice" className="font-medium">
+          Enable voice input
+        </label>
+      </div>
+
       <div className="space-y-4">
         {prompts.map((prompt) => (
           <div key={prompt} className="space-y-1">
@@ -241,15 +312,19 @@ export default function InspectionForm() {
                 setResponses((r) => ({ ...r, [prompt]: e.target.value }))
               }
             />
-            <button
-              type="button"
-              className="px-3 py-1 bg-blue-600 text-white rounded"
-              onClick={() =>
-                recordingPrompt === prompt ? stopRecording() : startRecording(prompt)
-              }
-            >
-              {recordingPrompt === prompt ? 'Stop' : 'Speak'}
-            </button>
+            {voiceEnabled && (
+              <button
+                type="button"
+                className="px-3 py-1 bg-blue-600 text-white rounded"
+                onClick={() =>
+                  recordingPrompt === prompt
+                    ? stopRecording()
+                    : startRecording(prompt)
+                }
+              >
+                {recordingPrompt === prompt ? 'Stop' : 'Speak'}
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -276,6 +351,14 @@ export default function InspectionForm() {
           ))}
         </ul>
       </div>
+
+      <button
+        type="button"
+        className="px-4 py-2 bg-green-600 text-white rounded"
+        onClick={handleSubmit}
+      >
+        Submit Inspection
+      </button>
     </div>
   );
 }
