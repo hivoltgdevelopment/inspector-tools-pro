@@ -56,6 +56,8 @@ npm run dev
 
 Create a `.env` file and set `VITE_SKIP_AUTH=true` to bypass the SMS authentication flow and render the protected screens directly.
 
+To surface the placeholder payments UI, add `VITE_PAYMENTS_ENABLED=true` to your `.env` file.
+
 ### Build
 ```bash
 npm run build        # Standard build

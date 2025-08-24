@@ -1,10 +1,37 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
+vi.mock('idb-keyval', () => {
+  const store = new Map<string, any>();
+  return {
+    createStore: () => ({}),
+    set: (key: any, val: any) => {
+      store.set(key, val);
+      return Promise.resolve();
+    },
+    get: (key: any) => Promise.resolve(store.get(key)),
+    del: (key: any) => {
+      store.delete(key);
+      return Promise.resolve();
+    },
+    keys: () => Promise.resolve(Array.from(store.keys())),
+    _store: store,
+  };
+});
+
+import * as idbKeyval from 'idb-keyval';
+
+main
 // Preserve any existing implementations so we can restore them after tests
 const originalCreateObjectURL = URL.createObjectURL;
 const originalRevokeObjectURL = URL.revokeObjectURL;
 
+codex/continue-implementation-of-feature-sphc6g
+beforeEach(() => {
+  (idbKeyval as any)._store.clear();
+});
+
+main
 beforeAll(() => {
   // jsdom doesn't implement these APIs, so provide lightweight mocks
   Object.defineProperty(global.URL, 'createObjectURL', {

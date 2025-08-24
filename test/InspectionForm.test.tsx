@@ -134,4 +134,39 @@ describe('InspectionForm features', () => {
     expect(getCurrentPosition).toHaveBeenCalled();
     expect(await screen.findByText(/10.00, 20.00/)).toBeInTheDocument();
   });
+
+  it('queues media when offline and flushes when back online', async () => {
+    const user = userEvent.setup();
+
+    Object.defineProperty(window.navigator, 'onLine', {
+      value: false,
+      configurable: true,
+    });
+
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+
+    render(<InspectionForm />);
+
+    const label = screen.getByText('Add Photo or Video');
+    const input = label.nextElementSibling as HTMLInputElement;
+    const file = new File(['hi'], 'test.png', { type: 'image/png' });
+    await user.upload(input, file);
+
+    expect(
+      await screen.findByText('Queued • syncs when online')
+    ).toBeInTheDocument();
+
+    Object.defineProperty(window.navigator, 'onLine', {
+      value: true,
+      configurable: true,
+    });
+    window.dispatchEvent(new Event('online'));
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText('Queued • syncs when online')
+      ).not.toBeInTheDocument()
+    );
+  });
 });
