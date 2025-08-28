@@ -236,3 +236,7 @@ Implementation tip: The export function should verify admin status from the user
   - Rotate in Supabase → Settings → API (regenerate anon/service keys).
   - Update local `.env.local` and Function Secrets with the new values.
   - Redeploy affected functions.
+
+## Release
+
+- See the release checklist: [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md)
