@@ -11,6 +11,10 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Validate tag input
         run: |
           if [ -z "${{ github.event.inputs.tag }}" ]; then
@@ -30,11 +34,40 @@ jobs:
         run: |
           npm ping
           gh api -X GET rate_limit > /dev/null
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-      - run: npm ci
-      # Additional release steps go here
+      - run: npm ci --prefer-offline --no-audit --fund=false
+
+      - name: Create and push RC tag
+        id: tag
+        env:
+          TAG: ${{ github.event.inputs.tag }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+            echo "Tag ${TAG} already exists"
+          else
+            git config user.name "${{ github.actor }}"
+            git config user.email "${{ github.actor }}@users.noreply.github.com"
+            git tag -a "${TAG}" -m "RC ${TAG}"
+            git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO}.git"
+            git push origin "refs/tags/${TAG}"
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release (draft)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          gh release view "$TAG" >/dev/null 2>&1 || \
+          gh release create "$TAG" --draft --title "$TAG" --notes "RC release $TAG"
+
+      # Build artifacts (optional)
+      # - run: npm run build

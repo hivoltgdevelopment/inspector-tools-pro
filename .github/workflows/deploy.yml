@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
 
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -12,12 +16,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-      - run: npm ci
-      - run: npm run build:gh-pages
-      - run: npm run deploy
+      - run: npm ci --prefer-offline --no-audit --fund=false
+      - name: Build (GitHub Pages base path)
+        run: npm run build:gh-pages
+        env:
+          # Provide safe defaults to allow build to succeed
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || 'https://example.supabase.co' }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY || 'anon-key-placeholder' }}
+          VITE_SKIP_AUTH: ${{ vars.VITE_SKIP_AUTH || 'false' }}
+          VITE_SKIP_RBAC: ${{ vars.VITE_SKIP_RBAC || 'false' }}
+      - name: Publish to gh-pages branch
+        run: npm run deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
