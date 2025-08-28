@@ -213,3 +213,18 @@ create policy "clients read own reports" on public.reports
 ```
 
 Implementation tip: The export function should verify admin status from the user JWT (e.g., a custom claim or a lookup) and reject non-admins. The save-consent function can accept public input but must sanitize and rate-limit; it should write using the service key, not trust the client to write directly.
+
+## Supabase Functions
+
+- Paths: `supabase/functions/save-sms-consent/`, `supabase/functions/export-consent-data/`
+- Env vars (set in Supabase → Project Settings → Functions → Secrets):
+  - `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+- Deploy:
+  - `supabase functions deploy save-sms-consent`
+  - `supabase functions deploy export-consent-data`
+- Local serve (one at a time):
+  - `supabase functions serve save-sms-consent`
+  - `supabase functions serve export-consent-data`
+- Notes:
+  - Use the service role only in functions; never expose it to the client.
+  - The export function requires an authenticated user JWT with `role=admin`.
