@@ -32,11 +32,7 @@ This section tracks progress against the original PRD. Marked for Cody to contin
 - [~] **CI/CD (GitHub Actions)** – configured, errors with workflow refs and proxy issues need Cody’s attention.
 - [x] **Branding (Guardian palette, logo)** – complete.
 - [ ] **Offline sync-on-connect mode** – not started.
-- [ ] **Dependency alignment for npm ci** – **blocking issue**; lock file and `package.json` out of sync. Cody to:
-  - Delete `node_modules` and `package-lock.json`.
-  - Run `npm install` to regenerate lock file.
-  - Commit/push new `package-lock.json`.
-  - Verify `npm ci && npm test` succeed in pipeline and locally.
+- [x] **Dependency alignment for npm ci** – **resolved**; `package-lock.json` and `package.json` are in sync (see PRD_TRACKER.md).
 
 ---
 
@@ -51,7 +47,6 @@ This section tracks progress against the original PRD. Marked for Cody to contin
 4. **Implement offline queue system** for media uploads (Supabase + local cache).
 5. **Wire up payments** (Stripe & Coinbase Commerce) for vendor scheduling.
 6. **Document disclaimers** in generated reports (align with Guardian Home Check liability wording).
-7. **Resolve npm ci dependency mismatch** by following the lock file regeneration process above.
 
 ---
 
