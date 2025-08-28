@@ -6,11 +6,13 @@
 import { serve } from "https://deno.land/std@0.195.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+// On Supabase Edge Functions, SUPABASE_URL and SUPABASE_ANON_KEY are injected by the platform.
+// The service role key must be provided as a custom secret (avoid SUPABASE_* prefix): SERVICE_ROLE_KEY
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+const SERVICE_ROLE_KEY = Deno.env.get("SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
-  throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY env var");
+  throw new Error("Missing SUPABASE_URL or SERVICE_ROLE_KEY env var");
 }
 
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
@@ -63,4 +65,3 @@ function json(data: unknown, status = 200) {
     headers: { "Content-Type": "application/json" },
   });
 }
-

@@ -5,13 +5,15 @@
 import { serve } from "https://deno.land/std@0.195.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+// SUPABASE_URL and SUPABASE_ANON_KEY are injected by the platform in Edge Functions.
+// Provide the service role key via SERVICE_ROLE_KEY (custom secret name).
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
-const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+const SERVICE_ROLE_KEY = Deno.env.get("SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 if (!SUPABASE_URL || !ANON_KEY || !SERVICE_ROLE_KEY) {
   throw new Error(
-    "Missing SUPABASE_URL, SUPABASE_ANON_KEY, or SUPABASE_SERVICE_ROLE_KEY env var",
+    "Missing SUPABASE_URL, SUPABASE_ANON_KEY, or SERVICE_ROLE_KEY env var",
   );
 }
 
@@ -91,4 +93,3 @@ function csvEscape(s: string): string {
   }
   return s;
 }
-

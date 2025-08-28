@@ -216,18 +216,23 @@ Implementation tip: The export function should verify admin status from the user
 
 ## Supabase Functions
 
-- Paths: `supabase/functions/save-sms-consent/`, `supabase/functions/export-consent-data/`
-- Env vars (set in Supabase → Project Settings → Functions → Secrets):
-  - `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+- Paths: `supabase/functions/save-sms-consent/`, `supabase/functions/export-consent-data/`, `supabase/functions/create-payment-session/`
+- Env vars:
+  - Edge Functions inject `SUPABASE_URL` and `SUPABASE_ANON_KEY` automatically.
+  - Set the service role key as a custom secret (avoid `SUPABASE_*` prefix): `SERVICE_ROLE_KEY`.
 - Deploy:
   - `supabase functions deploy save-sms-consent`
   - `supabase functions deploy export-consent-data`
+  - `supabase functions deploy create-payment-session`
 - Local serve (one at a time):
   - `supabase functions serve save-sms-consent`
   - `supabase functions serve export-consent-data`
+  - `supabase functions serve create-payment-session`
 - Notes:
   - Use the service role only in functions; never expose it to the client.
   - The export function requires an authenticated user JWT with `role=admin`.
+
+Windows users: see CLI install via Scoop in `docs/CLI_SETUP_WINDOWS.md`.
 
 ## Security
 
