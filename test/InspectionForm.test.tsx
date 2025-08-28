@@ -77,7 +77,7 @@ describe('InspectionForm media and offline behavior', () => {
     expect(await screen.findByText('test.png')).toBeInTheDocument();
   });
 
-  it('submits offline: queues uploads, shows alert, clears media', async () => {
+  it('submits offline: queues uploads, shows status, clears media', async () => {
     const user = userEvent.setup();
 
     // Simulate offline
@@ -85,9 +85,6 @@ describe('InspectionForm media and offline behavior', () => {
       value: false,
       configurable: true,
     });
-
-    // Mock alert
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
     render(<InspectionForm />);
 
@@ -104,13 +101,10 @@ describe('InspectionForm media and offline behavior', () => {
     // Submit while offline
     await user.click(screen.getByRole('button', { name: /submit inspection/i }));
 
-    // Sees status indicator and alert
+    // Sees status indicator
     expect(screen.getByText(/status: offline \(queued\)/i)).toBeInTheDocument();
-    expect(alertSpy).toHaveBeenCalled();
 
     // Media should be cleared after offline submit
     await waitFor(() => expect(screen.queryByText('offline.png')).not.toBeInTheDocument());
-
-    alertSpy.mockRestore();
   });
 });

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from 'sonner';
 
 type InspectionFormValues = {
   address: string;
@@ -168,14 +169,14 @@ export default function InspectionForm({ onSubmitted }: Props) {
             });
           }
         }
-        alert("You're offline. Inspection and media were queued and will sync when reconnected.");
+        toast.info("You're offline. Inspection and media were queued and will sync when reconnected.");
         onSubmitted?.(crypto.randomUUID());
         setMedia([]);
         setValues((v) => ({ ...v, notes: "" }));
       }
     } catch (err) {
       console.error(err);
-      alert("Submission failed. Your data may be saved offline and retried.");
+      toast.error("Submission failed. Your data may be saved offline and retried.");
     } finally {
       setSubmitting(false);
     }
