@@ -6,6 +6,7 @@ import ConsentAdmin from './components/ConsentAdmin';
 import ClientPortal from './components/ClientPortal';
 import RequireRole from './components/RequireRole';
 import { supabase } from './lib/supabase';
+import NotAuthorized from './components/NotAuthorized';
 
 export default function App() {
   const [authed, setAuthed] = useState(false);
@@ -41,7 +42,7 @@ export default function App() {
         <Route
           path="/admin/consent"
           element={
-            <RequireRole roles={['admin']}>
+            <RequireRole roles={['admin']} redirectTo="/not-authorized">
               <ConsentAdmin />
             </RequireRole>
           }
@@ -49,7 +50,7 @@ export default function App() {
         <Route
           path="/portal"
           element={
-            <RequireRole roles={['client']}>
+            <RequireRole roles={['client']} redirectTo="/not-authorized">
               <ClientPortal />
             </RequireRole>
           }
@@ -57,13 +58,14 @@ export default function App() {
         <Route
           path="/"
           element={
-            <RequireRole roles={['inspector']}>
+            <RequireRole roles={['inspector']} redirectTo="/not-authorized">
               <div className="p-4">
                 <InspectionForm />
               </div>
             </RequireRole>
           }
         />
+        <Route path="/not-authorized" element={<NotAuthorized />} />
       </Routes>
     </BrowserRouter>
   );
