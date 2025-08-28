@@ -1,10 +1,29 @@
-import { serve } from "https://deno.land/std/http/server.ts";
+// Minimal Supabase Edge Function: create-payment-session (stub)
+// Accepts { reportId } and returns a mock checkout URL.
+// Replace with real processor integration (e.g., Stripe) in production.
+
+import { serve } from "https://deno.land/std@0.195.0/http/server.ts";
 
 serve(async (req) => {
-  const { reportId } = await req.json();
-  // TODO: Use Stripe or Coinbase Commerce to create a real checkout session
-  const placeholderUrl = "https://example.com/checkout/" + reportId;
-  return new Response(JSON.stringify({ url: placeholderUrl }), {
+  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405 });
+  let body: any;
+  try {
+    body = await req.json();
+  } catch {
+    return json({ error: "Invalid JSON" }, 400);
+  }
+  const reportId = typeof body?.reportId === "string" ? body.reportId : null;
+  if (!reportId) return json({ error: "reportId is required" }, 400);
+
+  // Stubbed checkout URL for local/dev testing
+  const url = `https://example.com/checkout?reportId=${encodeURIComponent(reportId)}`;
+  return json({ url });
+});
+
+function json(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
     headers: { "Content-Type": "application/json" },
   });
-});
+}
+

@@ -228,3 +228,11 @@ Implementation tip: The export function should verify admin status from the user
 - Notes:
   - Use the service role only in functions; never expose it to the client.
   - The export function requires an authenticated user JWT with `role=admin`.
+
+## Security
+
+- Never commit real secrets. Keep real values only in `.env.local` (gitignored) or in Supabase Function Secrets.
+- If a key leaks (e.g., pasted in an issue or commit):
+  - Rotate in Supabase → Settings → API (regenerate anon/service keys).
+  - Update local `.env.local` and Function Secrets with the new values.
+  - Redeploy affected functions.
