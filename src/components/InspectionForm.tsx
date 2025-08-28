@@ -205,9 +205,10 @@ export default function InspectionForm({ onSubmitted }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label className="block text-sm font-medium">Property address</label>
+        <label htmlFor="address" className="block text-sm font-medium">Property address</label>
         <input
           className="mt-1 w-full rounded-md border px-3 py-2"
+          id="address"
           name="address"
           value={values.address}
           onChange={onChange}
@@ -217,10 +218,11 @@ export default function InspectionForm({ onSubmitted }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium">Inspection date</label>
+        <label htmlFor="date" className="block text-sm font-medium">Inspection date</label>
         <input
           type="date"
           className="mt-1 w-full rounded-md border px-3 py-2"
+          id="date"
           name="date"
           value={values.date}
           onChange={onChange}
@@ -230,7 +232,7 @@ export default function InspectionForm({ onSubmitted }: Props) {
 
       <div>
         <div className="flex items-center justify-between">
-          <label className="block text-sm font-medium">Notes</label>
+          <label htmlFor="notes" className="block text-sm font-medium">Notes</label>
           <div className="flex items-center gap-3">
             <label className="inline-flex items-center gap-2 text-sm">
               <input
@@ -254,6 +256,7 @@ export default function InspectionForm({ onSubmitted }: Props) {
         </div>
         <textarea
           className="mt-1 w-full rounded-md border px-3 py-2"
+          id="notes"
           name="notes"
           value={values.notes}
           onChange={onChange}
