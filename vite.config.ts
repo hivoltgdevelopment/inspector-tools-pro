@@ -89,7 +89,7 @@ export default defineConfig(({ mode }) => ({
           },
           {
             src: 'icon-512.png',
-            sizes: '512x512', 
+            sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
           }
@@ -108,29 +108,20 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           vendor: ['react', 'react-dom'],
           ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
-          utils: ['date-fns', 'clsx', 'tailwind-merge']
-        }
-      }
+          utils: ['date-fns', 'clsx', 'tailwind-merge'],
+        },
+      },
     },
     sourcemap: false,
-    minify: 'esbuild'
-codex/continue-implementation-of-feature-xdvitk
+    minify: 'esbuild',
   },
   test: {
     environment: 'jsdom',
     globals: true,
     setupFiles: ['test/setupTests.ts'],
-    setupFiles: ['test/setupTests.ts'],
-
-    setupFiles: ['test/setupTests.ts'],
-
-  setupFiles: './test/setupTests.ts',
-
-main
     env: {
       VITE_SUPABASE_URL: 'https://example.com',
       VITE_SUPABASE_ANON_KEY: 'anon-key'
     }
-main
   }
 }));
