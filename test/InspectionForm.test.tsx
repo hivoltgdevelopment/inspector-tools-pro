@@ -77,7 +77,7 @@ describe('InspectionForm media and offline behavior', () => {
     expect(await screen.findByText('test.png')).toBeInTheDocument();
   });
 
-  it('submits offline: queues uploads, shows status, clears media', async () => {
+  it('submits offline: queues uploads, shows toast, clears media', async () => {
     const user = userEvent.setup();
 
     // Simulate offline
@@ -101,8 +101,8 @@ describe('InspectionForm media and offline behavior', () => {
     // Submit while offline
     await user.click(screen.getByRole('button', { name: /submit inspection/i }));
 
-    // Sees status indicator
-    expect(screen.getByText(/status: offline \(queued\)/i)).toBeInTheDocument();
+    // Sees offline toast messaging (rendered by sonner)
+    await screen.findByText(/submissions will be queued and auto/i);
 
     // Media should be cleared after offline submit
     await waitFor(() => expect(screen.queryByText('offline.png')).not.toBeInTheDocument());

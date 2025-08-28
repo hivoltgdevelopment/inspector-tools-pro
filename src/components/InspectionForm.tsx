@@ -49,6 +49,7 @@ export default function InspectionForm({ onSubmitted }: Props) {
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [listening, setListening] = useState(false);
   const online = useOnline();
+  const prevOnlineRef = useRef<boolean>(typeof navigator !== "undefined" ? navigator.onLine : true);
 
   // ===== Voice-to-form (notes field) =====
   const recognitionRef = useRef<SpeechRecognition | null>(null as any);
@@ -169,7 +170,6 @@ export default function InspectionForm({ onSubmitted }: Props) {
             });
           }
         }
-        toast.info("You're offline. Inspection and media were queued and will sync when reconnected.");
         onSubmitted?.(crypto.randomUUID());
         setMedia([]);
         setValues((v) => ({ ...v, notes: "" }));
@@ -202,6 +202,18 @@ export default function InspectionForm({ onSubmitted }: Props) {
       cancelled = true;
     };
   }, [online, values]);
+
+  // Toast network status changes
+  useEffect(() => {
+    if (prevOnlineRef.current !== online) {
+      if (!online) {
+        toast.info("You’re offline — submissions will be queued and auto‑sent when you reconnect.");
+      } else {
+        toast.success("Back online. Syncing queued items…");
+      }
+    }
+    prevOnlineRef.current = online;
+  }, [online]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -291,11 +303,7 @@ export default function InspectionForm({ onSubmitted }: Props) {
             ))}
           </ul>
         )}
-        {!online && (
-          <p className="mt-2 text-xs text-amber-700">
-            You’re offline — submissions will be queued and auto‑sent when you reconnect.
-          </p>
-        )}
+        {/* Offline messaging now handled via toasts */}
       </div>
 
       <div className="flex items-center gap-3">
@@ -306,9 +314,7 @@ export default function InspectionForm({ onSubmitted }: Props) {
         >
           {submitting ? "Submitting…" : "Submit inspection"}
         </button>
-        <span className={`text-xs ${online ? "text-green-700" : "text-amber-700"}`}>
-          Status: {online ? "Online" : "Offline (queued)"}
-        </span>
+        {/* Status badge removed in favor of toasts */}
       </div>
     </form>
   );
