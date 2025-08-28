@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { isValidPhone } from '@/lib/phone';
 
@@ -33,23 +34,29 @@ export default function SMSAuth() {
     e.preventDefault();
     setError(null);
     if (!consent) {
-      setError('You must consent to receive SMS messages.');
+      const msg = 'You must consent to receive SMS messages.';
+      setError(msg);
+      toast.error(msg);
       return;
     }
     if (!isValidPhone(phone)) {
-      setError('Please enter a valid phone number in E.164 format.');
+      const msg = 'Please enter a valid phone number in E.164 format.';
+      setError(msg);
+      toast.error(msg);
       return;
     }
     setLoading(true);
     try {
       await recordConsentAndSend();
       setStage('otp');
+      toast.success('Verification code sent.');
     } catch (err: unknown) {
       const message =
         err instanceof Error
           ? err.message
           : 'Failed to send verification code. Please try again.';
       setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -65,12 +72,14 @@ export default function SMSAuth() {
         throw error;
       }
       setStage('success');
+      toast.success('Phone number verified!');
     } catch (err: unknown) {
       const message =
         err instanceof Error
           ? err.message
           : 'Failed to verify code. Please try again.';
       setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }

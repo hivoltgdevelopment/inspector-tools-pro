@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { isValidPhone } from '@/lib/phone';
+import { toast } from 'sonner';
 
 export default function SMSConsentForm() {
   const [name, setName] = useState('');
@@ -14,12 +15,16 @@ export default function SMSConsentForm() {
     setError(null);
     setSuccess(null);
     if (!consent) {
-      setError('You must explicitly consent to receive SMS messages.');
+      const msg = 'You must explicitly consent to receive SMS messages.';
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
     if (!isValidPhone(phone)) {
-      setError('Please enter a valid phone number in E.164 format.');
+      const msg = 'Please enter a valid phone number in E.164 format.';
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
@@ -58,6 +63,7 @@ export default function SMSConsentForm() {
         throw new Error('Failed to save consent.');
       }
       setSuccess('Consent recorded successfully.');
+      toast.success('Consent recorded successfully.');
       setName('');
       setPhone('');
       setConsent(false);
@@ -67,6 +73,7 @@ export default function SMSConsentForm() {
           ? err.message
           : 'Failed to save consent.';
       setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }

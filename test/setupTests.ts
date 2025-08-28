@@ -1,5 +1,8 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { Toaster } from 'sonner';
 
 vi.mock('idb-keyval', () => {
   const store = new Map<string, any>();
@@ -27,6 +30,7 @@ const originalRevokeObjectURL = URL.revokeObjectURL;
 const originalAlert = window.alert;
 const originalSpeechRecognition = (window as any).SpeechRecognition;
 const originalWebkitSpeechRecognition = (window as any).webkitSpeechRecognition;
+let toasterRoot: ReturnType<typeof createRoot> | null = null;
 
 beforeEach(() => {
   (idbKeyval as any)._store.clear();
@@ -111,4 +115,18 @@ afterAll(() => {
     value: originalWebkitSpeechRecognition,
     configurable: true,
   });
+  if (toasterRoot) {
+    toasterRoot.unmount();
+    toasterRoot = null;
+  }
+});
+
+// Mount a global Toaster so toast() calls render during tests
+beforeAll(() => {
+  const host = document.createElement('div');
+  document.body.appendChild(host);
+  toasterRoot = createRoot(host);
+  toasterRoot.render(
+    React.createElement(React.StrictMode, null, React.createElement(Toaster, { position: 'top-right' }))
+  );
 });
