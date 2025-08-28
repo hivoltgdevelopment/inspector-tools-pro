@@ -24,6 +24,9 @@ import * as idbKeyval from 'idb-keyval';
 // Preserve any existing implementations so we can restore them after tests
 const originalCreateObjectURL = URL.createObjectURL;
 const originalRevokeObjectURL = URL.revokeObjectURL;
+const originalAlert = window.alert;
+const originalSpeechRecognition = (window as any).SpeechRecognition;
+const originalWebkitSpeechRecognition = (window as any).webkitSpeechRecognition;
 
 beforeEach(() => {
   (idbKeyval as any)._store.clear();
@@ -41,6 +44,42 @@ beforeAll(() => {
     configurable: true,
     writable: true,
   });
+
+  // Provide a no-op alert to avoid jsdom "not implemented" errors
+  if (!vi.isMockFunction(window.alert)) {
+    Object.defineProperty(window, 'alert', {
+      value: vi.fn(),
+      configurable: true,
+      writable: true,
+    });
+  }
+
+  // Provide a minimal SpeechRecognition mock if missing; tests can override
+  const makeSR = () => {
+    return class MockRecognition {
+      continuous = true;
+      interimResults = true;
+      lang = 'en-US';
+      onresult: ((event: any) => void) | null = null;
+      onend: (() => void) | null = null;
+      start = vi.fn();
+      stop = vi.fn(() => this.onend && this.onend());
+    } as unknown as typeof (window as any).SpeechRecognition;
+  };
+  if (!(window as any).SpeechRecognition) {
+    Object.defineProperty(window as any, 'SpeechRecognition', {
+      value: makeSR(),
+      configurable: true,
+      writable: true,
+    });
+  }
+  if (!(window as any).webkitSpeechRecognition) {
+    Object.defineProperty(window as any, 'webkitSpeechRecognition', {
+      value: (window as any).SpeechRecognition || makeSR(),
+      configurable: true,
+      writable: true,
+    });
+  }
 });
 
 afterAll(() => {
@@ -53,6 +92,23 @@ afterAll(() => {
   Object.defineProperty(global.URL, 'revokeObjectURL', {
     // @ts-expect-error allow undefined restoration
     value: originalRevokeObjectURL,
+    configurable: true,
+  });
+
+  Object.defineProperty(window, 'alert', {
+    // @ts-expect-error allow undefined restoration
+    value: originalAlert,
+    configurable: true,
+  });
+
+  Object.defineProperty(window as any, 'SpeechRecognition', {
+    // @ts-expect-error allow undefined restoration
+    value: originalSpeechRecognition,
+    configurable: true,
+  });
+  Object.defineProperty(window as any, 'webkitSpeechRecognition', {
+    // @ts-expect-error allow undefined restoration
+    value: originalWebkitSpeechRecognition,
     configurable: true,
   });
 });
