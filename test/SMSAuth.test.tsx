@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import SMSAuth from '@/components/SMSAuth';
@@ -27,14 +28,18 @@ describe('SMSAuth', () => {
 
     render(<SMSAuth />);
 
-    await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
-    await user.click(screen.getByRole('checkbox'));
-    await user.click(screen.getByRole('button', { name: /send code/i }));
+    await act(async () => {
+      await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
+      await user.click(screen.getByRole('checkbox'));
+      await user.click(screen.getByRole('button', { name: /send code/i }));
+    });
 
     await screen.findByPlaceholderText('Enter code');
 
-    await user.type(screen.getByPlaceholderText('Enter code'), '123456');
-    await user.click(screen.getByRole('button', { name: /verify code/i }));
+    await act(async () => {
+      await user.type(screen.getByPlaceholderText('Enter code'), '123456');
+      await user.click(screen.getByRole('button', { name: /verify code/i }));
+    });
 
     await screen.findByText('Phone number verified!');
   });
@@ -43,8 +48,10 @@ describe('SMSAuth', () => {
     const user = userEvent.setup();
     render(<SMSAuth />);
 
-    await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
-    await user.click(screen.getByRole('button', { name: /send code/i }));
+    await act(async () => {
+      await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
+      await user.click(screen.getByRole('button', { name: /send code/i }));
+    });
 
     await screen.findByText('You must consent to receive SMS messages.');
   });
@@ -56,9 +63,11 @@ describe('SMSAuth', () => {
 
     render(<SMSAuth />);
 
-    await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
-    await user.click(screen.getByRole('checkbox'));
-    await user.click(screen.getByRole('button', { name: /send code/i }));
+    await act(async () => {
+      await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
+      await user.click(screen.getByRole('checkbox'));
+      await user.click(screen.getByRole('button', { name: /send code/i }));
+    });
 
     await screen.findByText(/failed to send verification code\. ?please try again/i);
   });

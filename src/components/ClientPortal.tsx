@@ -43,6 +43,7 @@ export default function ClientPortal() {
       <input
         type="search"
         placeholder="Search reports..."
+        aria-label="Search reports"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         className="border p-2 mb-4 w-full rounded"

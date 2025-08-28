@@ -55,9 +55,7 @@ describe('InspectionForm voice input', () => {
     } as any);
 
     await waitFor(() =>
-      expect(
-        screen.getByPlaceholderText('Observations, anomalies, maintenance items...')
-      ).toHaveValue('recorded text')
+      expect(screen.getByLabelText(/notes/i)).toHaveValue('recorded text')
     );
   });
 });
@@ -93,11 +91,8 @@ describe('InspectionForm media and offline behavior', () => {
 
     render(<InspectionForm />);
 
-    // Fill minimal required fields (query by placeholder as labels are not bound via htmlFor)
-    await user.type(
-      screen.getByPlaceholderText('123 Desert Vista Dr'),
-      '123 Desert Vista Dr'
-    );
+    // Fill minimal required fields using accessible labels
+    await user.type(screen.getByLabelText(/property address/i), '123 Desert Vista Dr');
     // Date defaults; ensure it remains
 
     // Attach a file

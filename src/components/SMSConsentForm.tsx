@@ -76,17 +76,23 @@ export default function SMSConsentForm() {
     <div className="border rounded p-4 space-y-4 max-w-sm">
       <h2 className="font-bold">SMS Consent Form</h2>
       <form onSubmit={handleSubmit} className="space-y-2">
+        <label htmlFor="consent-name" className="sr-only">Full name</label>
         <input
+          id="consent-name"
           type="text"
           placeholder="Full name"
+          aria-label="Full name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="w-full border rounded p-2"
           required
         />
+        <label htmlFor="consent-phone" className="sr-only">Phone number</label>
         <input
+          id="consent-phone"
           type="tel"
           placeholder="Phone number"
+          aria-label="Phone number"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           className="w-full border rounded p-2"
@@ -108,8 +114,8 @@ export default function SMSConsentForm() {
           {loading ? 'Submitting...' : 'Submit'}
         </button>
       </form>
-      {error && <p className="text-red-600 text-sm">{error}</p>}
-      {success && <p className="text-green-600 text-sm">{success}</p>}
-    </div>
+      {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
+      {success && <p aria-live="polite" className="text-green-600 text-sm">{success}</p>}
+      </div>
   );
 }

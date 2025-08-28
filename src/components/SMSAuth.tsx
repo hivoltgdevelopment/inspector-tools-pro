@@ -82,9 +82,12 @@ export default function SMSAuth() {
 
       {stage === 'phone' && (
         <form onSubmit={handleSendCode} className="space-y-2">
+          <label htmlFor="auth-phone" className="sr-only">Phone number</label>
           <input
+            id="auth-phone"
             type="tel"
             placeholder="Phone number"
+            aria-label="Phone number"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             className="w-full border rounded p-2"
@@ -109,9 +112,12 @@ export default function SMSAuth() {
 
       {stage === 'otp' && (
         <form onSubmit={handleVerify} className="space-y-2">
+          <label htmlFor="auth-code" className="sr-only">Verification code</label>
           <input
+            id="auth-code"
             type="text"
             placeholder="Enter code"
+            aria-label="Verification code"
             value={code}
             onChange={(e) => setCode(e.target.value)}
             className="w-full border rounded p-2"
@@ -130,7 +136,7 @@ export default function SMSAuth() {
         <p className="text-green-600">Phone number verified!</p>
       )}
 
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+      {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
     </div>
   );
 }

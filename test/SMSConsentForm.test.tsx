@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import SMSConsentForm from '@/components/SMSConsentForm';
@@ -15,10 +16,12 @@ describe('SMSConsentForm', () => {
 
     render(<SMSConsentForm />);
 
-    await user.type(screen.getByPlaceholderText('Full name'), 'John Doe');
-    await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
-    await user.click(screen.getByRole('checkbox'));
-    await user.click(screen.getByRole('button', { name: /submit/i }));
+    await act(async () => {
+      await user.type(screen.getByPlaceholderText('Full name'), 'John Doe');
+      await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
+      await user.click(screen.getByRole('checkbox'));
+      await user.click(screen.getByRole('button', { name: /submit/i }));
+    });
 
     await screen.findByText('Consent recorded successfully.');
   });
@@ -27,9 +30,11 @@ describe('SMSConsentForm', () => {
     const user = userEvent.setup();
     render(<SMSConsentForm />);
 
-    await user.type(screen.getByPlaceholderText('Full name'), 'John Doe');
-    await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
-    await user.click(screen.getByRole('button', { name: /submit/i }));
+    await act(async () => {
+      await user.type(screen.getByPlaceholderText('Full name'), 'John Doe');
+      await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
+      await user.click(screen.getByRole('button', { name: /submit/i }));
+    });
 
     await screen.findByText('You must explicitly consent to receive SMS messages.');
   });
@@ -43,10 +48,12 @@ describe('SMSConsentForm', () => {
 
     render(<SMSConsentForm />);
 
-    await user.type(screen.getByPlaceholderText('Full name'), 'John Doe');
-    await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
-    await user.click(screen.getByRole('checkbox'));
-    await user.click(screen.getByRole('button', { name: /submit/i }));
+    await act(async () => {
+      await user.type(screen.getByPlaceholderText('Full name'), 'John Doe');
+      await user.type(screen.getByPlaceholderText('Phone number'), '+15551234567');
+      await user.click(screen.getByRole('checkbox'));
+      await user.click(screen.getByRole('button', { name: /submit/i }));
+    });
 
     // Component should surface the canonical error message
     expect(await screen.findByText('Failed to save consent.')).toHaveTextContent(
