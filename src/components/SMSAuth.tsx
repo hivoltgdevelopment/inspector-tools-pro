@@ -27,7 +27,9 @@ export default function SMSAuth() {
       try {
         const data = await res.json();
         details = (data && (data.error || data.message)) || '';
-      } catch {}
+      } catch (_err) {
+        // ignore JSON parse errors from non-JSON responses
+      }
       throw new Error(details ? `Failed to record consent: ${details}` : 'Failed to record consent');
     }
     const { error } = await supabase.auth.signInWithOtp({ phone: normalizedPhone });

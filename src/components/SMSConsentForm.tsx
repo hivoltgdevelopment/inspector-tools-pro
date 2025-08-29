@@ -68,7 +68,9 @@ export default function SMSConsentForm() {
         try {
           const data = await res.json();
           details = (data && (data.error || data.message)) || '';
-        } catch {}
+        } catch (_err) {
+          // ignore JSON parse errors from non-JSON responses
+        }
         throw new Error(details ? `Failed to save consent. ${details}` : 'Failed to save consent.');
       }
       setSuccess('Consent recorded successfully.');
