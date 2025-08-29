@@ -16,7 +16,19 @@ export default function ClientPortal() {
     (typeof process !== 'undefined' ? (process as any).env?.VITE_PAYMENTS_ENABLED : undefined)
     ?? (import.meta as any).env?.VITE_PAYMENTS_ENABLED
   );
-  const paymentsEnabled = paymentsFlag === 'true';
+  let paymentsEnabled = paymentsFlag === 'true';
+  // Developer override for local testing: query param or localStorage
+  if (import.meta && (import.meta as any).env?.DEV) {
+    try {
+      const url = new URL(window.location.href);
+      const qp = url.searchParams.get('payments');
+      if (qp === 'true') paymentsEnabled = true;
+      if (qp === 'false') paymentsEnabled = false;
+      const ls = localStorage.getItem('payments_enabled');
+      if (ls === 'true') paymentsEnabled = true;
+      if (ls === 'false') paymentsEnabled = false;
+    } catch {}
+  }
 
   useEffect(() => {
     const load = async () => {

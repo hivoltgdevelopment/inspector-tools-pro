@@ -46,6 +46,10 @@ E2E_BASE_URL=http://localhost:5173 npm run test:e2e
 - `client-portal.spec.ts`
   - Intercepts Supabase auth + REST calls; lists and filters mock reports.
 
+- `client-portal-payments.spec.ts`
+  - Uses a dev-only override to toggle payments visibility without a rebuild:
+    - `?payments=true|false` or `localStorage.setItem('payments_enabled', 'true|false')`
+
 ## Notes
 
 - For networked flows (e.g., Supabase Auth or Functions), prefer unit/integration tests or add Playwright route interception/mocking as needed.
