@@ -28,6 +28,7 @@ import * as idbKeyval from 'idb-keyval';
 const originalCreateObjectURL = URL.createObjectURL;
 const originalRevokeObjectURL = URL.revokeObjectURL;
 const originalAlert = window.alert;
+<<<<<<< ours
 const originalSpeechRecognition = (window as any).SpeechRecognition;
 const originalWebkitSpeechRecognition = (window as any).webkitSpeechRecognition;
 let toasterRoot: ReturnType<typeof createRoot> | null = null;
@@ -36,6 +37,13 @@ beforeEach(() => {
   (idbKeyval as any)._store.clear();
 });
 
+=======
+
+beforeEach(() => {
+  (idbKeyval as any)._store.clear();
+});
+
+>>>>>>> theirs
 beforeAll(() => {
   // jsdom doesn't implement these APIs, so provide lightweight mocks
   Object.defineProperty(global.URL, 'createObjectURL', {
@@ -48,6 +56,16 @@ beforeAll(() => {
     configurable: true,
     writable: true,
   });
+<<<<<<< ours
+=======
+
+  Object.defineProperty(window, 'alert', {
+    value: vi.fn(),
+    configurable: true,
+    writable: true,
+  });
+});
+>>>>>>> theirs
 
   // Provide a no-op alert to avoid jsdom "not implemented" errors
   if (!vi.isMockFunction(window.alert)) {
@@ -104,6 +122,7 @@ afterAll(() => {
     value: originalAlert,
     configurable: true,
   });
+<<<<<<< ours
 
   Object.defineProperty(window as any, 'SpeechRecognition', {
     // @ts-expect-error allow undefined restoration
@@ -129,4 +148,6 @@ beforeAll(() => {
   toasterRoot.render(
     React.createElement(React.StrictMode, null, React.createElement(Toaster, { position: 'top-right' }))
   );
+=======
+>>>>>>> theirs
 });
