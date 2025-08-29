@@ -2,6 +2,16 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react-swc";
 import { VitePWA } from 'vite-plugin-pwa';
 import path from "path";
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+let hasSentry = false;
+try {
+  require.resolve('@sentry/browser');
+  hasSentry = true;
+} catch (_) {
+  hasSentry = false;
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -101,6 +111,7 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      ...(hasSentry ? {} : { '@sentry/browser': path.resolve(__dirname, './src/lib/sentry-empty.ts') }),
     },
   },
   build: {
