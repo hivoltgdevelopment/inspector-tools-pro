@@ -11,7 +11,7 @@ export default function SMSAuth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const recordConsentAndSend = async () => {
+  const recordConsentAndSend = async (normalizedPhone: string) => {
     const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/save-sms-consent`;
     const res = await fetch(functionUrl, {
       method: 'POST',
@@ -20,7 +20,7 @@ export default function SMSAuth() {
         apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
       },
-      body: JSON.stringify({ phone, consent: true }),
+      body: JSON.stringify({ phone: normalizedPhone, consent: true }),
     });
     if (!res.ok) {
       let details = '';
@@ -30,7 +30,7 @@ export default function SMSAuth() {
       } catch {}
       throw new Error(details ? `Failed to record consent: ${details}` : 'Failed to record consent');
     }
-    const { error } = await supabase.auth.signInWithOtp({ phone });
+    const { error } = await supabase.auth.signInWithOtp({ phone: normalizedPhone });
     if (error) {
       throw error;
     }
@@ -54,10 +54,9 @@ export default function SMSAuth() {
     }
     setLoading(true);
     try {
-      // Temporarily set phone to normalized value for backend calls
-      const original = phone;
+      // Normalize immediately so subsequent calls use the same value
       setPhone(e164);
-      await recordConsentAndSend();
+      await recordConsentAndSend(e164);
       setStage('otp');
       toast.success('Verification code sent.');
       // keep normalized phone for follow-up verify
