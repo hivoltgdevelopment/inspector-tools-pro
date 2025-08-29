@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from 'sonner';
 import { uploadMedia } from '@/lib/storage';
+import { compressImage } from '@/lib/image';
 
 type InspectionFormValues = {
   address: string;
@@ -161,7 +162,8 @@ export default function InspectionForm({ onSubmitted }: Props) {
         // Upload media to storage (best-effort); collect URLs (unused placeholder)
         const urls: string[] = [];
         for (const f of media) {
-          const url = await uploadMedia(f).catch(() => '');
+          const toUpload = f.type.startsWith('image/') ? await compressImage(f) : f;
+          const url = await uploadMedia(toUpload, { signed: true }).catch(() => '');
           if (url) urls.push(url);
         }
         const { id } = await submitInspectionApi({ values, media });
@@ -170,7 +172,9 @@ export default function InspectionForm({ onSubmitted }: Props) {
         if (queue?.flushQueue) {
           await queue.flushQueue(async (item) => {
             // Upload queued media then submit placeholder payload
-            await uploadMedia(item.file).catch(() => '');
+            const f = item.file;
+            const toUpload = f.type.startsWith('image/') ? await compressImage(f) : f;
+            await uploadMedia(toUpload, { signed: true }).catch(() => '');
             const metaValues = (item.meta && (item.meta as { values?: InspectionFormValues }).values) || values;
             await submitInspectionApi({ values: metaValues, media: [item.file] });
           });

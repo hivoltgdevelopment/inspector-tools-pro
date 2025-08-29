@@ -293,6 +293,10 @@ Set up a bucket to store photos/videos.
 - Public bucket: the app uses `getPublicUrl` (no auth needed); simplest for prototyping.
 - Private bucket: use signed URLs. The app includes `uploadMedia(file, { signed: true, expiresInSeconds: 3600 })`, which calls `createSignedUrl` after upload. Ensure users are authenticated and the above policies exist.
 
+5) Client-side compression (optional)
+- Large images are compressed before upload by default in the inspection form (to ~1600px max side, ~80% quality).
+- Utility: `compressImage(file, { maxWidth, maxHeight, quality })` in `src/lib/image.ts`.
+
 Notes
 - For stricter control, generate signed URLs via an Edge Function using the service role instead of the client.
 - Thumbnails: consider a tiny client-side compression step before upload or an Edge Function to generate thumbnails server-side.
