@@ -192,7 +192,10 @@ export default function InspectionForm({ onSubmitted }: Props) {
         onSubmitted?.(id);
         // Reset
         setMedia([]);
+        setUploadedUrls([]);
+        setUploadProgress({ done: 0, total: 0 });
         setValues((v) => ({ ...v, notes: "" }));
+        toast.success("Inspection submitted.");
       } else {
         // Offline: queue the inspection & media; a separate effect will flush
         if (queue?.enqueueUpload) {
@@ -207,7 +210,10 @@ export default function InspectionForm({ onSubmitted }: Props) {
         }
         onSubmitted?.(crypto.randomUUID());
         setMedia([]);
+        setUploadedUrls([]);
+        setUploadProgress({ done: 0, total: 0 });
         setValues((v) => ({ ...v, notes: "" }));
+        toast.info("Offline: inspection queued.");
       }
     } catch (err) {
       console.error(err);
