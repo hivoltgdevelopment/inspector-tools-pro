@@ -11,7 +11,12 @@ export default function ClientPortal() {
   const [reports, setReports] = useState<Report[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
-  const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true';
+  // Prefer process.env so tests can override with vi.stubEnv; fall back to import.meta.env
+  const paymentsFlag = (
+    (typeof process !== 'undefined' ? (process as any).env?.VITE_PAYMENTS_ENABLED : undefined)
+    ?? (import.meta as any).env?.VITE_PAYMENTS_ENABLED
+  );
+  const paymentsEnabled = paymentsFlag === 'true';
 
   useEffect(() => {
     const load = async () => {
@@ -63,4 +68,3 @@ export default function ClientPortal() {
     </div>
   );
 }
-

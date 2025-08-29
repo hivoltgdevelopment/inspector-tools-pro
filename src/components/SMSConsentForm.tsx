@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { isValidPhone, toE164, normalizeToE164 } from '@/lib/phone';
+import { normalizeToE164, toE164 } from '@/lib/phone';
 import { toast } from 'sonner';
-import { toE164 } from '@/lib/phone';
 
 export default function SMSConsentForm() {
   const [name, setName] = useState('');

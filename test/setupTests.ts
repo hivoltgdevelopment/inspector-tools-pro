@@ -85,6 +85,26 @@ beforeAll(() => {
     });
   }
 
+  // Provide minimal crypto.randomUUID for environments lacking it
+  const g: any = globalThis as any;
+  if (!g.crypto || typeof g.crypto.randomUUID !== 'function') {
+    const randomUUID = () =>
+      'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    const getRandomValues = (arr: Uint8Array) => {
+      for (let i = 0; i < arr.length; i++) arr[i] = (Math.random() * 256) | 0;
+      return arr;
+    };
+    Object.defineProperty(g, 'crypto', {
+      value: { randomUUID, getRandomValues },
+      configurable: true,
+      writable: true,
+    });
+  }
+
   // Mount a global Toaster so toast() calls render during tests
   const host = document.createElement('div');
   document.body.appendChild(host);
@@ -129,4 +149,3 @@ afterAll(() => {
     toasterRoot = null;
   }
 });
-

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
@@ -23,7 +23,8 @@ describe('SMSConsentForm', () => {
       await user.click(screen.getByRole('button', { name: /submit/i }));
     });
 
-    await screen.findByText('Consent recorded successfully.');
+    const container = screen.getByRole('heading', { name: /sms consent form/i }).closest('div')!;
+    await within(container).findByText('Consent recorded successfully.');
   });
 
   it('requires explicit consent', async () => {
@@ -36,7 +37,11 @@ describe('SMSConsentForm', () => {
       await user.click(screen.getByRole('button', { name: /submit/i }));
     });
 
-    await screen.findByText('You must explicitly consent to receive SMS messages.');
+    // Inline alert (scoped to form), not the toast
+    const container = screen.getByRole('heading', { name: /sms consent form/i }).closest('div')!;
+    expect(
+      await within(container).findByRole('alert')
+    ).toHaveTextContent('You must explicitly consent to receive SMS messages.');
   });
 
   it('shows error when request fails', async () => {
@@ -55,10 +60,11 @@ describe('SMSConsentForm', () => {
       await user.click(screen.getByRole('button', { name: /submit/i }));
     });
 
-    // Component should surface the canonical error message
-    expect(await screen.findByText('Failed to save consent.')).toHaveTextContent(
-      'Failed to save consent.'
-    );
+    // Assert inline error message inside the form container
+    const container2 = screen.getByRole('heading', { name: /sms consent form/i }).closest('div')!;
+    expect(
+      await within(container2).findByRole('alert')
+    ).toHaveTextContent('Failed to save consent.');
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalled());
   });

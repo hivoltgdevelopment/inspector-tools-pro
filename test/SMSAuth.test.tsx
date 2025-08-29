@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
@@ -41,7 +41,8 @@ describe('SMSAuth', () => {
       await user.click(screen.getByRole('button', { name: /verify code/i }));
     });
 
-    await screen.findByText('Phone number verified!');
+    const container = screen.getByRole('heading', { name: /sms authentication/i }).closest('div')!;
+    await within(container).findByText('Phone number verified!');
   });
 
   it('validates consent before sending code', async () => {
@@ -53,7 +54,10 @@ describe('SMSAuth', () => {
       await user.click(screen.getByRole('button', { name: /send code/i }));
     });
 
-    await screen.findByText('You must consent to receive SMS messages.');
+    const container = screen.getByRole('heading', { name: /sms authentication/i }).closest('div')!;
+    expect(
+      await within(container).findByRole('alert')
+    ).toHaveTextContent('You must consent to receive SMS messages.');
   });
 
   it('shows error when sign in fails', async () => {
@@ -69,6 +73,9 @@ describe('SMSAuth', () => {
       await user.click(screen.getByRole('button', { name: /send code/i }));
     });
 
-    await screen.findByText(/failed to send verification code\. ?please try again/i);
+    const container = screen.getByRole('heading', { name: /sms authentication/i }).closest('div')!;
+    expect(
+      await within(container).findByRole('alert')
+    ).toHaveTextContent(/failed to send verification code\. ?please try again/i);
   });
 });
