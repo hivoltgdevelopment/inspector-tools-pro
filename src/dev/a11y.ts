@@ -30,24 +30,18 @@ async function runAxe() {
     if (!window.axe) return;
     const { violations } = await window.axe.run(document);
     if (!violations.length) {
-      // eslint-disable-next-line no-console
       console.info('[a11y] No accessibility violations found');
       return;
     }
-    // eslint-disable-next-line no-console
     console.groupCollapsed(`%c[a11y] ${violations.length} violation(s)`, 'color:#b45309');
     for (const v of violations) {
-      // eslint-disable-next-line no-console
       console.warn(`- ${v.id} (${v.impact || 'n/a'}): ${v.description}\n  ${v.helpUrl || ''}`);
       for (const n of v.nodes.slice(0, 3)) {
-        // eslint-disable-next-line no-console
         console.log('  node:', n.target?.join(' ') || '', '\n  html:', n.html || '', '\n  summary:', n.failureSummary || '');
       }
     }
-    // eslint-disable-next-line no-console
     console.groupEnd();
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.debug('[a11y] audit failed', e);
   }
 }
@@ -58,4 +52,3 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 } else {
   window.addEventListener('DOMContentLoaded', () => setTimeout(runAxe, 1000));
 }
-

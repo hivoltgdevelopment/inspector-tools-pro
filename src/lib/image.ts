@@ -29,7 +29,7 @@ export async function compressImage(
     canvas.height = height;
     const ctx = canvas.getContext('2d');
     if (!ctx) return file;
-    ctx.drawImage(img as any, 0, 0, width, height);
+    ctx.drawImage(img as unknown as CanvasImageSource, 0, 0, width, height);
 
     const blob: Blob | null = await new Promise((resolve) =>
       canvas.toBlob(resolve, mimeType, quality)
@@ -61,4 +61,3 @@ function constrainDimensions(
   const ratio = Math.min(maxW / w, maxH / h, 1);
   return { width: Math.round(w * ratio), height: Math.round(h * ratio) };
 }
-

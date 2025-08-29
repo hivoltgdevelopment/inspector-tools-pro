@@ -13,21 +13,20 @@ export default function ClientPortal() {
   const [query, setQuery] = useState('');
   // Prefer process.env so tests can override with vi.stubEnv; fall back to import.meta.env
   const paymentsFlag = (
-    (typeof process !== 'undefined' ? (process as any).env?.VITE_PAYMENTS_ENABLED : undefined)
-    ?? (import.meta as any).env?.VITE_PAYMENTS_ENABLED
+    (typeof process !== 'undefined'
+      ? (process as unknown as { env?: Record<string, string | undefined> }).env?.VITE_PAYMENTS_ENABLED
+      : undefined) ?? import.meta.env.VITE_PAYMENTS_ENABLED
   );
   let paymentsEnabled = paymentsFlag === 'true';
   // Developer override for local testing: query param or localStorage
-  if (import.meta && (import.meta as any).env?.DEV) {
-    try {
-      const url = new URL(window.location.href);
-      const qp = url.searchParams.get('payments');
-      if (qp === 'true') paymentsEnabled = true;
-      if (qp === 'false') paymentsEnabled = false;
-      const ls = localStorage.getItem('payments_enabled');
-      if (ls === 'true') paymentsEnabled = true;
-      if (ls === 'false') paymentsEnabled = false;
-    } catch {}
+  if (import.meta.env.DEV) {
+    const url = new URL(window.location.href);
+    const qp = url.searchParams.get('payments');
+    if (qp === 'true') paymentsEnabled = true;
+    if (qp === 'false') paymentsEnabled = false;
+    const ls = localStorage.getItem('payments_enabled');
+    if (ls === 'true') paymentsEnabled = true;
+    if (ls === 'false') paymentsEnabled = false;
   }
 
   useEffect(() => {
@@ -36,22 +35,20 @@ export default function ClientPortal() {
       let userId = userData.user?.id as string | undefined;
 
       // Dev-only overrides to help local/E2E testing without auth
-      if ((import.meta as any).env?.DEV && !userId) {
-        try {
-          const url = new URL(window.location.href);
-          const qp = url.searchParams.get('client');
-          const ls = localStorage.getItem('client_id') || undefined;
-          userId = (qp || ls) || undefined;
-          // Demo data mode: show placeholder reports without hitting API
-          const demo = url.searchParams.get('demo') || localStorage.getItem('demo_reports');
-          if (!userId && (demo === '1' || demo === 'true')) {
-            setReports([
-              { id: 'demo-1', title: 'Roof Report' } as Report,
-              { id: 'demo-2', title: 'Basement Report' } as Report,
-            ]);
-            return;
-          }
-        } catch {}
+      if (import.meta.env.DEV && !userId) {
+        const url = new URL(window.location.href);
+        const qp = url.searchParams.get('client');
+        const ls = localStorage.getItem('client_id') || undefined;
+        userId = (qp || ls) || undefined;
+        // Demo data mode: show placeholder reports without hitting API
+        const demo = url.searchParams.get('demo') || localStorage.getItem('demo_reports');
+        if (!userId && (demo === '1' || demo === 'true')) {
+          setReports([
+            { id: 'demo-1', title: 'Roof Report' },
+            { id: 'demo-2', title: 'Basement Report' },
+          ]);
+          return;
+        }
       }
 
       if (!userId) {

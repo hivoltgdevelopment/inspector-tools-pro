@@ -11,7 +11,8 @@ if (import.meta.env.DEV && import.meta.env.VITE_A11Y_AUDIT === 'true') {
 }
 
 // Initialize telemetry (no‑op unless explicitly enabled via env)
-void initTelemetry({ environment: import.meta.env.MODE, release: (import.meta as any).env?.VITE_RELEASE });
+const envRelease = (import.meta as unknown as { env: Record<string, string | undefined> }).env?.VITE_RELEASE;
+void initTelemetry({ environment: import.meta.env.MODE, release: envRelease });
 attachGlobalErrorHandlers();
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(

@@ -358,7 +358,6 @@ export default function InspectionForm({ onSubmitted }: Props) {
           <div className="mt-2 grid grid-cols-3 gap-2">
             {uploadedUrls.map((u, idx) => (
               <a key={idx} href={u} target="_blank" rel="noreferrer" className="block">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={u} alt={`uploaded ${idx + 1}`} className="h-20 w-full object-cover rounded" />
               </a>
             ))}

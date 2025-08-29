@@ -5,22 +5,30 @@
 
 type Level = 'debug' | 'info' | 'warning' | 'error' | 'fatal';
 
+type SentryModule = {
+  init: (opts: Record<string, unknown>) => void;
+  Breadcrumbs: new (opts?: Record<string, unknown>) => unknown;
+  captureException: (e: unknown, ctx?: { extra?: Record<string, unknown> }) => void;
+  captureMessage: (m: string, opts?: { level?: string; extra?: Record<string, unknown> }) => void;
+};
+
 let enabled = false;
-let sentry: any = null;
+let sentry: SentryModule | null = null;
 
 export async function initTelemetry(opts?: { environment?: string; release?: string }) {
-  const dsn = (import.meta as any).env?.VITE_SENTRY_DSN as string | undefined;
-  const allow = (import.meta as any).env?.VITE_TELEMETRY_ENABLED === 'true';
+  const env = import.meta.env as unknown as Record<string, string | boolean | undefined>;
+  const dsn = env.VITE_SENTRY_DSN as string | undefined;
+  const allow = env.VITE_TELEMETRY_ENABLED === 'true';
   enabled = Boolean(dsn && allow);
   if (!enabled) return;
   try {
     // Lazy import so the SDK is only pulled when configured.
     // If the package is not installed, this will throw and we fallback to no‑op.
-    const mod = await import(/* @vite-ignore */ '@sentry/browser');
+    const mod = (await import(/* @vite-ignore */ '@sentry/browser')) as unknown as SentryModule;
     sentry = mod;
     mod.init({
       dsn,
-      environment: opts?.environment || (import.meta as any).env?.MODE,
+      environment: opts?.environment || (env.MODE as string | undefined),
       release: opts?.release,
       integrations: [new mod.Breadcrumbs({ console: false })],
       tracesSampleRate: 0,
@@ -34,8 +42,7 @@ export async function initTelemetry(opts?: { environment?: string; release?: str
 
 export function captureException(error: unknown, context?: Record<string, unknown>) {
   if (!enabled || !sentry) {
-    if ((import.meta as any).env?.DEV) {
-      // eslint-disable-next-line no-console
+    if (import.meta.env.DEV) {
       console.debug('[telemetry] exception (noop):', error, context || '');
     }
     return;
@@ -49,8 +56,7 @@ export function captureException(error: unknown, context?: Record<string, unknow
 
 export function captureMessage(message: string, level: Level = 'info', context?: Record<string, unknown>) {
   if (!enabled || !sentry) {
-    if ((import.meta as any).env?.DEV) {
-      // eslint-disable-next-line no-console
+    if (import.meta.env.DEV) {
       console.debug('[telemetry] message (noop):', level, message, context || '');
     }
     return;
@@ -69,7 +75,6 @@ export function attachGlobalErrorHandlers() {
     captureException(e.error || e.message || 'window.error');
   });
   window.addEventListener('unhandledrejection', (e) => {
-    captureException((e as any).reason || 'unhandledrejection');
+    captureException((e as PromiseRejectionEvent).reason || 'unhandledrejection');
   });
 }
-
