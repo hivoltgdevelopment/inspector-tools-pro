@@ -234,6 +234,13 @@ Implementation tip: The export function should verify admin status from the user
 
 Windows users: see CLI install via Scoop in `docs/CLI_SETUP_WINDOWS.md`.
 
+### Quick Tester Script (PowerShell)
+
+- Run from repo root to exercise functions without manual curl quoting:
+  - `pwsh scripts/test-functions.ps1 -Action save-consent`
+  - Options: `-Action payment` or `-Action export -OutFile consent.csv`
+  - Reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from `.env.local`/`env.local` if not supplied.
+
 ## Security
 
 - Never commit real secrets. Keep real values only in `.env.local` (gitignored) or in Supabase Function Secrets.
