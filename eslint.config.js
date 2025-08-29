@@ -29,6 +29,19 @@ try {
       },
     }
   );
+  // Test and functions overrides
+  config.push(
+    {
+      files: [
+        "test/**/*.{ts,tsx}",
+        "**/*.test.{ts,tsx}",
+        "supabase/functions/**/*.ts",
+      ],
+      rules: {
+        "@typescript-eslint/no-explicit-any": "off",
+      },
+    }
+  );
 } catch {
   config = [
     {

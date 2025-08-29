@@ -3,14 +3,14 @@ import { v4 as uuidv4 } from 'uuid';
 
 const store = createStore('form-queue', 'forms');
 
-export interface FormQueueItem {
+export interface FormQueueItem<T = unknown> {
   id: string;
-  data: any;
+  data: T;
   timestamp: number;
 }
 
-export async function enqueueForm(data: any) {
-  const item: FormQueueItem = {
+export async function enqueueForm<T>(data: T) {
+  const item: FormQueueItem<T> = {
     id: uuidv4(),
     data,
     timestamp: Date.now(),
@@ -19,20 +19,20 @@ export async function enqueueForm(data: any) {
   return item;
 }
 
-export async function getQueuedForms() {
+export async function getQueuedForms<T = unknown>() {
   const ids = await keys(store);
-  const items: FormQueueItem[] = [];
+  const items: FormQueueItem<T>[] = [];
   for (const id of ids) {
-    const item = await get<FormQueueItem>(id, store);
+    const item = await get<FormQueueItem<T>>(id, store);
     if (item) items.push(item);
   }
   return items;
 }
 
-export async function flushQueue(
-  uploader: (data: any) => Promise<void>
+export async function flushQueue<T>(
+  uploader: (data: T) => Promise<void>
 ) {
-  const items = await getQueuedForms();
+  const items = await getQueuedForms<T>();
   for (const item of items) {
     try {
       await uploader(item.data);
@@ -43,14 +43,14 @@ export async function flushQueue(
   }
 }
 
-export function startFormWorker(
-  uploader: (data: any) => Promise<void>,
+export function startFormWorker<T>(
+  uploader: (data: T) => Promise<void>,
   onFlush?: (count: number) => void
 ) {
   const run = async () => {
-    await flushQueue(uploader);
+    await flushQueue<T>(uploader);
     if (onFlush) {
-      const items = await getQueuedForms();
+      const items = await getQueuedForms<T>();
       onFlush(items.length);
     }
   };

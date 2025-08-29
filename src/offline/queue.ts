@@ -1,7 +1,7 @@
 export interface UploadItem {
   id: string;
   file: File;
-  meta?: any;
+  meta?: Record<string, unknown>;
 }
 
 const uploads: UploadItem[] = [];

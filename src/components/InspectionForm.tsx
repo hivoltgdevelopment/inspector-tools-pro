@@ -52,7 +52,7 @@ export default function InspectionForm({ onSubmitted }: Props) {
   const prevOnlineRef = useRef<boolean>(typeof navigator !== "undefined" ? navigator.onLine : true);
 
   // ===== Voice-to-form (notes field) =====
-  const recognitionRef = useRef<SpeechRecognition | null>(null as any);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   useEffect(() => {
     if (!voiceEnabled) {
       if (recognitionRef.current) {
@@ -61,10 +61,12 @@ export default function InspectionForm({ onSubmitted }: Props) {
       }
       return;
     }
-    const SR: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) return; // unsupported; UI still shows toggle but no effect
+    const SRCtor = ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) as
+      | (new () => SpeechRecognition)
+      | undefined;
+    if (!SRCtor) return; // unsupported; UI still shows toggle but no effect
 
-    const rec: SpeechRecognition = new SR();
+    const rec: SpeechRecognition = new SRCtor();
     rec.continuous = true;
     rec.interimResults = true;
     rec.lang = "en-US";
@@ -86,8 +88,10 @@ export default function InspectionForm({ onSubmitted }: Props) {
     return () => {
       try {
         rec.stop();
-      } catch {}
-      recognitionRef.current = null as any;
+      } catch (_e) {
+        // ignore errors stopping recognition
+      }
+      recognitionRef.current = null;
     };
   }, [voiceEnabled]);
 
@@ -140,7 +144,12 @@ export default function InspectionForm({ onSubmitted }: Props) {
     setSubmitting(true);
     try {
       // Lazy import to keep tests happy and avoid idb-keyval loading when not needed
-      const queue = await import("../offline/queue").catch(() => null as any);
+      let queue: typeof import("../offline/queue") | null = null;
+      try {
+        queue = await import("../offline/queue");
+      } catch (_e) {
+        queue = null;
+      }
 
       if (online) {
         // Online: try real submit first
@@ -148,9 +157,10 @@ export default function InspectionForm({ onSubmitted }: Props) {
 
         // If we still maintain a queue for resilience, flush after success
         if (queue?.flushQueue) {
-          await queue.flushQueue(async (item: any) => {
+          await queue.flushQueue(async (item) => {
             // Replace with real upload path
-            await submitInspectionApi({ values: item.meta?.values ?? values, media: [item.file] });
+            const metaValues = (item.meta && (item.meta as { values?: InspectionFormValues }).values) || values;
+            await submitInspectionApi({ values: metaValues, media: [item.file] });
           });
         }
 
@@ -188,11 +198,17 @@ export default function InspectionForm({ onSubmitted }: Props) {
     (async () => {
       if (!online) return;
       try {
-        const queue = await import("../offline/queue").catch(() => null as any);
+        let queue: typeof import("../offline/queue") | null = null;
+        try {
+          queue = await import("../offline/queue");
+        } catch (_e) {
+          queue = null;
+        }
         if (!queue?.flushQueue) return;
-        await queue.flushQueue(async (item: any) => {
+        await queue.flushQueue(async (item) => {
           if (cancelled) return;
-          await submitInspectionApi({ values: item.meta?.values ?? values, media: [item.file] });
+          const metaValues = (item.meta && (item.meta as { values?: InspectionFormValues }).values) || values;
+          await submitInspectionApi({ values: metaValues, media: [item.file] });
         });
       } catch (e) {
         // swallow; will retry next online event
