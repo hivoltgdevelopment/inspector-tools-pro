@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from 'sonner';
+import { uploadMedia } from '@/lib/storage';
 
 type InspectionFormValues = {
   address: string;
@@ -157,12 +158,19 @@ export default function InspectionForm({ onSubmitted }: Props) {
 
       if (online) {
         // Online: try real submit first
+        // Upload media to storage (best-effort); collect URLs (unused placeholder)
+        const urls: string[] = [];
+        for (const f of media) {
+          const url = await uploadMedia(f).catch(() => '');
+          if (url) urls.push(url);
+        }
         const { id } = await submitInspectionApi({ values, media });
 
         // If we still maintain a queue for resilience, flush after success
         if (queue?.flushQueue) {
           await queue.flushQueue(async (item) => {
-            // Replace with real upload path
+            // Upload queued media then submit placeholder payload
+            await uploadMedia(item.file).catch(() => '');
             const metaValues = (item.meta && (item.meta as { values?: InspectionFormValues }).values) || values;
             await submitInspectionApi({ values: metaValues, media: [item.file] });
           });

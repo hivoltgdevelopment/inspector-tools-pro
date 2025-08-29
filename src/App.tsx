@@ -7,6 +7,7 @@ import ClientPortal from './components/ClientPortal';
 import RequireRole from './components/RequireRole';
 import { supabase } from './lib/supabase';
 import NotAuthorized from './components/NotAuthorized';
+import PaymentResult from './components/PaymentResult';
 
 export default function App() {
   const [authed, setAuthed] = useState(false);
@@ -36,8 +37,10 @@ export default function App() {
     );
   }
 
+  // Use Vite base (e.g., '/inspector-tools/') so GH Pages subpath routing works
+  const base = (import.meta as any).env?.BASE_URL || '/';
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={base}>
       <Routes>
         <Route
           path="/admin/consent"
@@ -66,6 +69,8 @@ export default function App() {
           }
         />
         <Route path="/not-authorized" element={<NotAuthorized />} />
+        <Route path="/payment/success" element={<PaymentResult kind="success" />} />
+        <Route path="/payment/cancel" element={<PaymentResult kind="cancel" />} />
       </Routes>
     </BrowserRouter>
   );
