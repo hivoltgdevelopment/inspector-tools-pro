@@ -87,6 +87,11 @@ To surface the placeholder payments UI, add `VITE_PAYMENTS_ENABLED=true` to your
 npm run build        # Standard build
 npm run build:gh-pages  # GitHub Pages build with relative paths
 ```
+ 
+### Performance
+- Route‑level code splitting with `React.lazy` is enabled for major views (Admin, Portal, Auth). Initial bundle is smaller and routes load on demand.
+- Vite manualChunks groups common UI libs (Radix) and vendor code to improve caching.
+- Images are compressed client‑side before upload (defaults ~1600px, ~80% JPEG quality; form uses 1280px/72% by default).
 
 ## Contributing
 
