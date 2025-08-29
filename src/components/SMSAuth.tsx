@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
-import { isValidPhone } from '@/lib/phone';
+import { isValidPhone, toE164 } from '@/lib/phone';
 
 export default function SMSAuth() {
   const [phone, setPhone] = useState('');
@@ -39,7 +39,8 @@ export default function SMSAuth() {
       toast.error(msg);
       return;
     }
-    if (!isValidPhone(phone)) {
+    const e164 = toE164(phone);
+    if (!e164) {
       const msg = 'Please enter a valid phone number in E.164 format.';
       setError(msg);
       toast.error(msg);
@@ -47,9 +48,13 @@ export default function SMSAuth() {
     }
     setLoading(true);
     try {
+      // Temporarily set phone to normalized value for backend calls
+      const original = phone;
+      setPhone(e164);
       await recordConsentAndSend();
       setStage('otp');
       toast.success('Verification code sent.');
+      // keep normalized phone for follow-up verify
     } catch (err: unknown) {
       const message =
         err instanceof Error
@@ -67,7 +72,8 @@ export default function SMSAuth() {
     setError(null);
     setLoading(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({ phone, token: code, type: 'sms' });
+      const e164 = toE164(phone);
+      const { error } = await supabase.auth.verifyOtp({ phone: e164 || phone, token: code, type: 'sms' });
       if (error) {
         throw error;
       }
@@ -97,10 +103,14 @@ export default function SMSAuth() {
             type="tel"
             placeholder="Phone number"
             aria-label="Phone number"
+            aria-describedby="auth-phone-hint"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             className="w-full border rounded p-2"
           />
+          <p id="auth-phone-hint" className="text-xs text-gray-500">
+            Example: +1 555 123 4567
+          </p>
           <label className="flex items-center space-x-2 text-sm">
             <input
               type="checkbox"
