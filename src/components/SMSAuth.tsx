@@ -28,7 +28,10 @@ export default function SMSAuth() {
         const data = await res.json();
         details = (data && (data.error || data.message)) || '';
       } catch (_err) {
-        // ignore JSON parse errors from non-JSON responses
+        if (import.meta.env.DEV) {
+          // eslint-disable-next-line no-console
+          console.debug('[SMSAuth] non-JSON error response');
+        }
       }
       throw new Error(details ? `Failed to record consent: ${details}` : 'Failed to record consent');
     }

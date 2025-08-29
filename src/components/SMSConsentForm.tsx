@@ -69,7 +69,10 @@ export default function SMSConsentForm() {
           const data = await res.json();
           details = (data && (data.error || data.message)) || '';
         } catch (_err) {
-          // ignore JSON parse errors from non-JSON responses
+          if (import.meta.env.DEV) {
+            // eslint-disable-next-line no-console
+            console.debug('[SMSConsentForm] non-JSON error response');
+          }
         }
         throw new Error(details ? `Failed to save consent. ${details}` : 'Failed to save consent.');
       }
