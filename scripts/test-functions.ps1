@@ -19,9 +19,9 @@ function Read-EnvFromFile {
   $map = @{}
   Get-Content -LiteralPath $Path | ForEach-Object {
     $line = $_.Trim()
-    if (-not $line -or $line.StartsWith('#')) { return }
+    if (-not $line -or $line.StartsWith('#')) { continue }
     $idx = $line.IndexOf('=')
-    if ($idx -lt 1) { return }
+    if ($idx -lt 1) { continue }
     $k = $line.Substring(0,$idx).Trim()
     $v = $line.Substring($idx+1).Trim().Trim('"')
     $map[$k] = $v
@@ -35,7 +35,7 @@ function Resolve-Config {
   if ($cfg.Url -and $cfg.Anon) { return $cfg }
 
   # Try env files relative to script
-  $root = Resolve-Path (Join-Path $PSScriptRoot '..')
+  $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
   $envFiles = @(
     Join-Path $root '.env.local',
     Join-Path $root 'env.local',
@@ -67,7 +67,7 @@ function Test-SaveConsent {
   $headers = New-AuthHeader -Token $Anon
   $body = @{ name=$Name; phone=$Phone; consent=$true } | ConvertTo-Json -Compress
   $uri = "$BaseUrl/functions/v1/save-sms-consent"
-  $resp = Invoke-WebRequest -Method POST -Uri $uri -Headers $headers -ContentType 'application/json' -Body $body
+  $resp = Invoke-WebRequest -Method POST -Uri $uri -Headers $headers -ContentType 'application/json' -Body $body -UseBasicParsing
   Write-Host ("Status: {0}" -f $resp.StatusCode)
   if ($resp.Content) { Write-Host $resp.Content }
 }
@@ -78,7 +78,7 @@ function Test-CreatePayment {
   $headers = New-AuthHeader -Token $Anon
   $body = @{ reportId=$ReportId } | ConvertTo-Json -Compress
   $uri = "$BaseUrl/functions/v1/create-payment-session"
-  $resp = Invoke-WebRequest -Method POST -Uri $uri -Headers $headers -ContentType 'application/json' -Body $body
+  $resp = Invoke-WebRequest -Method POST -Uri $uri -Headers $headers -ContentType 'application/json' -Body $body -UseBasicParsing
   Write-Host ("Status: {0}" -f $resp.StatusCode)
   if ($resp.Content) { Write-Host $resp.Content }
 }
@@ -93,7 +93,7 @@ function Test-ExportConsent {
     Invoke-WebRequest -Method GET -Uri $uri -Headers $headers -OutFile $OutFile -UseBasicParsing | Out-Null
     Write-Host ("Saved CSV to {0}" -f (Resolve-Path $OutFile))
   } else {
-    $resp = Invoke-WebRequest -Method GET -Uri $uri -Headers $headers
+    $resp = Invoke-WebRequest -Method GET -Uri $uri -Headers $headers -UseBasicParsing
     Write-Host ("Status: {0}" -f $resp.StatusCode)
     $lines = ($resp.Content -split "`n")
     $preview = ($lines | Select-Object -First 5) -join "`n"
@@ -117,14 +117,19 @@ try {
   }
 }
 catch {
-  Write-Host ("Error: {0}" -f $_.Exception.Message) -ForegroundColor Red
-  if ($_.Exception.Response -and ($_.Exception.Response.ContentLength -gt 0)) {
-    try {
-      $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
-      $content = $reader.ReadToEnd()
-      if ($content) { Write-Host $content }
-    } catch {}
-  }
+  $e = $_.Exception
+  Write-Host ("Error: {0}" -f $e.Message) -ForegroundColor Red
+  try {
+    if ($_.ErrorDetails -and $_.ErrorDetails.Message) {
+      Write-Host $_.ErrorDetails.Message
+    } elseif ($e.PSObject.Properties.Name -contains 'Response' -and $e.Response) {
+      $stream = $e.Response.GetResponseStream()
+      if ($stream) {
+        $reader = New-Object System.IO.StreamReader($stream)
+        $content = $reader.ReadToEnd()
+        if ($content) { Write-Host $content }
+      }
+    }
+  } catch {}
   exit 1
 }
-
