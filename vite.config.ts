@@ -66,7 +66,6 @@ export default defineConfig(({ mode }) => ({
         enabled: false, // disable SW in dev to avoid noisy fetch errors
         type: 'module'
       },
-<<<<<<< ours
       manifest: {
         name: 'Inspector Tools Pro - Professional Property Inspection',
         short_name: 'Inspector Pro',
@@ -126,64 +125,3 @@ export default defineConfig(({ mode }) => ({
     }
   }
 }));
-=======
-      manifest: {
-        name: 'Inspector Tools Pro - Professional Property Inspection',
-        short_name: 'Inspector Pro',
-        description: 'Professional property inspection tool for mobile devices',
-        theme_color: '#1e40af',
-        background_color: '#ffffff',
-        display: 'standalone',
-        orientation: 'any',
-        scope: '/',
-        start_url: '/',
-        categories: ['productivity', 'business', 'utilities'],
-        lang: 'en-US',
-        dir: 'ltr',
-        prefer_related_applications: false,
-        icons: [
-          {
-            src: 'icon-192.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any maskable'
-          },
-          {
-            src: 'icon-512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable'
-          }
-        ]
-      }
-    })
-  ],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
-          utils: ['date-fns', 'clsx', 'tailwind-merge'],
-        },
-      },
-    },
-    sourcemap: false,
-    minify: 'esbuild',
-  },
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: ['test/setupTests.ts'],
-    env: {
-      VITE_SUPABASE_URL: 'https://example.com',
-      VITE_SUPABASE_ANON_KEY: 'anon-key'
-    }
-  }
-}));
->>>>>>> theirs
