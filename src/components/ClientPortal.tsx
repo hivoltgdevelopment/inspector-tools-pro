@@ -33,10 +33,28 @@ export default function ClientPortal() {
   useEffect(() => {
     const load = async () => {
       const { data: userData } = await supabase.auth.getUser();
+      let userId = userData.user?.id as string | undefined;
+
+      // Dev-only overrides to help local/E2E testing without auth
+      if ((import.meta as any).env?.DEV && !userId) {
+        try {
+          const url = new URL(window.location.href);
+          const qp = url.searchParams.get('client');
+          const ls = localStorage.getItem('client_id') || undefined;
+          userId = (qp || ls) || undefined;
+        } catch {}
+      }
+
+      if (!userId) {
+        // No user available — avoid hitting the API with undefined filter
+        setReports([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('reports')
         .select('id, title')
-        .eq('client_id', userData.user?.id);
+        .eq('client_id', userId);
       if (error) {
         setError(error.message);
       } else {
