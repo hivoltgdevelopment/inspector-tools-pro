@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
-import { isValidPhone, toE164 } from '@/lib/phone';
+import { isValidPhone, toE164, normalizeToE164 } from '@/lib/phone';
 
 export default function SMSAuth() {
   const [phone, setPhone] = useState('');
@@ -39,7 +39,7 @@ export default function SMSAuth() {
       toast.error(msg);
       return;
     }
-    const e164 = toE164(phone);
+    const e164 = normalizeToE164(phone, '+1');
     if (!e164) {
       const msg = 'Please enter a valid phone number in E.164 format.';
       setError(msg);
@@ -72,7 +72,7 @@ export default function SMSAuth() {
     setError(null);
     setLoading(true);
     try {
-      const e164 = toE164(phone);
+      const e164 = normalizeToE164(phone, '+1') || toE164(phone);
       const { error } = await supabase.auth.verifyOtp({ phone: e164 || phone, token: code, type: 'sms' });
       if (error) {
         throw error;

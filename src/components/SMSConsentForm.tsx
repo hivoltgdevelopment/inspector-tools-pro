@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { isValidPhone } from '@/lib/phone';
+import { isValidPhone, toE164, normalizeToE164 } from '@/lib/phone';
 import { toast } from 'sonner';
 import { toE164 } from '@/lib/phone';
 
@@ -23,9 +23,9 @@ export default function SMSConsentForm() {
     }
 
     {
-      const e164 = toE164(phone);
+      const e164 = normalizeToE164(phone, '+1') || toE164(phone);
       if (!e164) {
-        const msg = 'Please enter a valid phone number in E.164 format.';
+        const msg = 'Please enter a valid phone number.';
         setError(msg);
         toast.error(msg);
         return;
@@ -61,7 +61,7 @@ export default function SMSConsentForm() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         },
-        body: JSON.stringify({ name, phone: toE164(phone) || phone, consent: true }),
+        body: JSON.stringify({ name, phone: normalizeToE164(phone, '+1') || toE164(phone) || phone, consent: true }),
       });
       if (!res.ok) {
         throw new Error('Failed to save consent.');
