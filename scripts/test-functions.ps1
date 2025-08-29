@@ -35,11 +35,11 @@ function Resolve-Config {
   if ($cfg.Url -and $cfg.Anon) { return $cfg }
 
   # Try env files relative to script
-  $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+  $root = (Resolve-Path -LiteralPath (Join-Path -Path $PSScriptRoot -ChildPath '..')).Path
   $envFiles = @(
-    Join-Path $root '.env.local',
-    Join-Path $root 'env.local',
-    Join-Path $root '.env'
+    (Join-Path -Path $root -ChildPath '.env.local')
+    (Join-Path -Path $root -ChildPath 'env.local')
+    (Join-Path -Path $root -ChildPath '.env')
   )
   foreach ($f in $envFiles) {
     $map = Read-EnvFromFile -Path $f
