@@ -42,6 +42,15 @@ export default function ClientPortal() {
           const qp = url.searchParams.get('client');
           const ls = localStorage.getItem('client_id') || undefined;
           userId = (qp || ls) || undefined;
+          // Demo data mode: show placeholder reports without hitting API
+          const demo = url.searchParams.get('demo') || localStorage.getItem('demo_reports');
+          if (!userId && (demo === '1' || demo === 'true')) {
+            setReports([
+              { id: 'demo-1', title: 'Roof Report' } as Report,
+              { id: 'demo-2', title: 'Basement Report' } as Report,
+            ]);
+            return;
+          }
         } catch {}
       }
 
