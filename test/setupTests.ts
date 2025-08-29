@@ -1,8 +1,6 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { Toaster } from 'sonner';
+// Silence the toast UI by mocking the sonner module below
 
 vi.mock('idb-keyval', () => {
   const store = new Map<string, any>();
@@ -22,6 +20,19 @@ vi.mock('idb-keyval', () => {
   };
 });
 
+// Silence toast UI completely in tests
+vi.mock('sonner', () => {
+  const noop = () => {};
+  const toast = Object.assign(noop, {
+    success: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    message: vi.fn(),
+  });
+  return { Toaster: () => null, toast };
+});
+
 import * as idbKeyval from 'idb-keyval';
 
 // Preserve originals for restoration after tests
@@ -30,7 +41,6 @@ const originalRevokeObjectURL = URL.revokeObjectURL;
 const originalAlert = window.alert;
 const originalSpeechRecognition = (window as any).SpeechRecognition;
 const originalWebkitSpeechRecognition = (window as any).webkitSpeechRecognition;
-let toasterRoot: ReturnType<typeof createRoot> | null = null;
 
 beforeEach(() => {
   (idbKeyval as any)._store.clear();
@@ -105,13 +115,7 @@ beforeAll(() => {
     });
   }
 
-  // Mount a global Toaster so toast() calls render during tests
-  const host = document.createElement('div');
-  document.body.appendChild(host);
-  toasterRoot = createRoot(host);
-  toasterRoot.render(
-    React.createElement(React.StrictMode, null, React.createElement(Toaster, { position: 'top-right' }))
-  );
+  // Toaster rendering is disabled by the mock above
 });
 
 afterAll(() => {
@@ -144,8 +148,5 @@ afterAll(() => {
     configurable: true,
   });
 
-  if (toasterRoot) {
-    toasterRoot.unmount();
-    toasterRoot = null;
-  }
+  // No toaster to unmount because we mock sonner
 });
