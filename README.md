@@ -142,6 +142,10 @@ Use these steps to get the app talking to Supabase in development.
 npm run dev
 ```
 
+## Changelog
+
+- See the changelog for recent changes and release notes: [CHANGELOG.md](CHANGELOG.md)
+
 ## Architecture (Overview)
 
 ```
@@ -312,3 +316,31 @@ Notes
 ## Release
 
 - See the release checklist: [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md)
+
+### Version Tagging
+
+When publishing a release:
+
+1. Update `CHANGELOG.md`
+   - Move items from “Unreleased” into a new version section like `## [vX.Y.Z] - YYYY-MM-DD`.
+   - Summarize any additional changes.
+2. Commit the changelog update
+   ```bash
+   git add CHANGELOG.md
+   git commit -m "docs(changelog): release vX.Y.Z"
+   ```
+3. Create an annotated tag and push it
+   ```bash
+   git tag -a vX.Y.Z -m "vX.Y.Z"
+   git push origin vX.Y.Z
+   ```
+   Or push all tags:
+   ```bash
+   git push --follow-tags
+   ```
+4. Create a GitHub Release (UI or CLI)
+   - UI: Draft a new release using tag `vX.Y.Z` and paste the changelog notes.
+   - CLI (optional):
+     ```bash
+     gh release create vX.Y.Z --generate-notes --title "vX.Y.Z"
+     ```
