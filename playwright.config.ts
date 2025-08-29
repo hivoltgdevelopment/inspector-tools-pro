@@ -8,10 +8,16 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: [['list']],
   use: {
-    baseURL: process.env.E2E_BASE_URL || 'http://localhost:8080',
+    baseURL: process.env.E2E_BASE_URL || 'http://localhost:4173',
     trace: 'on-first-retry',
     video: 'retain-on-failure',
     screenshot: 'only-on-failure',
+  },
+  webServer: process.env.E2E_WEB_SERVER === '0' ? undefined : {
+    command: 'npm run preview',
+    url: 'http://localhost:4173',
+    reuseExistingServer: !process.env.CI,
+    timeout: 60_000,
   },
   projects: [
     {
@@ -23,4 +29,3 @@ export default defineConfig({
     // { name: 'webkit', use: { ...devices['Desktop Safari'] } },
   ],
 });
-
