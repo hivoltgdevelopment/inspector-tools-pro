@@ -13,21 +13,30 @@ const STRIPE_MODE = (Deno.env.get("STRIPE_MODE") ?? "payment").toLowerCase(); //
 const SUCCESS_URL = Deno.env.get("SUCCESS_URL") ?? "https://example.com/success";
 const CANCEL_URL = Deno.env.get("CANCEL_URL") ?? "https://example.com/cancel";
 
+function withCors(res: Response) {
+  const headers = new Headers(res.headers);
+  headers.set("Access-Control-Allow-Origin", "*");
+  headers.set("Access-Control-Allow-Headers", "authorization, x-client-info, apikey, content-type");
+  headers.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  return new Response(res.body, { status: res.status, headers });
+}
+
 serve(async (req) => {
-  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405 });
+  if (req.method === "OPTIONS") return withCors(new Response(null, { status: 204 }));
+  if (req.method !== "POST") return withCors(new Response("Method Not Allowed", { status: 405 }));
   if (!STRIPE_SECRET_KEY) {
-    return json({ error: "Stripe not configured (STRIPE_SECRET_KEY missing)" }, 500);
+    return withCors(json({ error: "Stripe not configured (STRIPE_SECRET_KEY missing)" }, 500));
   }
 
   let body: unknown;
   try {
     body = await req.json();
   } catch {
-    return json({ error: "Invalid JSON" }, 400);
+    return withCors(json({ error: "Invalid JSON" }, 400));
   }
   const b = body as Record<string, unknown>;
   const reportId = typeof b?.reportId === "string" ? (b.reportId as string) : null;
-  if (!reportId) return json({ error: "reportId is required" }, 400);
+  if (!reportId) return withCors(json({ error: "reportId is required" }, 400));
 
   // Build form body for Stripe Checkout Session
   const form = new URLSearchParams();
@@ -55,7 +64,7 @@ serve(async (req) => {
       form.set("line_items[0][price_data][product_data][name]", "Inspection Invoice");
       form.set("line_items[0][price_data][unit_amount]", STRIPE_AMOUNT_CENTS);
     } else {
-      return json({ error: "Missing STRIPE_PRICE_ID or STRIPE_AMOUNT_CENTS" }, 500);
+      return withCors(json({ error: "Missing STRIPE_PRICE_ID or STRIPE_AMOUNT_CENTS" }, 500));
     }
   }
 
@@ -70,9 +79,9 @@ serve(async (req) => {
 
   const payload = (await resp.json()) as { url?: string; error?: unknown };
   if (!resp.ok || !payload.url) {
-    return json({ error: "Failed to create Stripe Checkout session", details: payload }, 502);
+    return withCors(json({ error: "Failed to create Stripe Checkout session", details: payload }, 502));
   }
-  return json({ url: payload.url });
+  return withCors(json({ url: payload.url }));
 });
 
 function json(data: unknown, status = 200) {
