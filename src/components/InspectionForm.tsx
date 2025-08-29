@@ -47,6 +47,9 @@ export default function InspectionForm({ onSubmitted }: Props) {
   });
   const [media, setMedia] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number }>({ done: 0, total: 0 });
+  const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [listening, setListening] = useState(false);
@@ -159,13 +162,19 @@ export default function InspectionForm({ onSubmitted }: Props) {
 
       if (online) {
         // Online: try real submit first
-        // Upload media to storage (best-effort); collect URLs (unused placeholder)
+        // Upload media to storage (best-effort); collect preview URLs
+        setUploading(true);
+        setUploadProgress({ done: 0, total: media.length });
         const urls: string[] = [];
         for (const f of media) {
-          const toUpload = f.type.startsWith('image/') ? await compressImage(f) : f;
-          const url = await uploadMedia(toUpload, { signed: true }).catch(() => '');
+          const toUpload = f.type.startsWith('image/')
+            ? await compressImage(f, { maxWidth: 1280, maxHeight: 1280, quality: 0.72, mimeType: 'image/jpeg' })
+            : f;
+          const url = await uploadMedia(toUpload, { signed: true, expiresInSeconds: 3600 }).catch(() => '');
           if (url) urls.push(url);
+          setUploadProgress((p) => ({ done: p.done + 1, total: p.total }));
         }
+        setUploadedUrls(urls);
         const { id } = await submitInspectionApi({ values, media });
 
         // If we still maintain a queue for resilience, flush after success
@@ -205,6 +214,7 @@ export default function InspectionForm({ onSubmitted }: Props) {
       toast.error("Submission failed. Your data may be saved offline and retried.");
     } finally {
       setSubmitting(false);
+      setUploading(false);
     }
   };
 
@@ -334,6 +344,19 @@ export default function InspectionForm({ onSubmitted }: Props) {
               </li>
             ))}
           </ul>
+        )}
+        {uploading && (
+          <p className="mt-2 text-xs text-gray-600">Uploading media… {uploadProgress.done}/{uploadProgress.total}</p>
+        )}
+        {!uploading && uploadedUrls.length > 0 && (
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {uploadedUrls.map((u, idx) => (
+              <a key={idx} href={u} target="_blank" rel="noreferrer" className="block">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={u} alt={`uploaded ${idx + 1}`} className="h-20 w-full object-cover rounded" />
+              </a>
+            ))}
+          </div>
         )}
         {/* Offline messaging now handled via toasts */}
       </div>
