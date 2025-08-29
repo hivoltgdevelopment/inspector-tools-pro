@@ -14,6 +14,7 @@ export default defineConfig({
     setupFiles: ['test/setupTests.ts'],
     globals: true,
     css: true,
+    exclude: ['e2e/**', 'node_modules/**', 'dist/**'],
     server: {
       deps: {
         inline: ['idb-keyval'],
