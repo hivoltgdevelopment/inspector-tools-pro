@@ -22,16 +22,17 @@ serve(async (req) => {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
-  let body: any;
+  let body: unknown;
   try {
     body = await req.json();
   } catch {
     return json({ error: "Invalid JSON" }, 400);
   }
 
-  const name = typeof body?.name === "string" ? body.name : null;
-  const phone = body?.phone;
-  const consent = body?.consent;
+  const b = body as Record<string, unknown>;
+  const name = typeof b?.name === "string" ? (b.name as string) : null;
+  const phone = b?.phone as string | undefined;
+  const consent = b?.consent as boolean | undefined;
 
   if (typeof phone !== "string" || !/^\+[1-9]\d{1,14}$/.test(phone)) {
     return json({ error: "Invalid phone (E.164 required)" }, 400);

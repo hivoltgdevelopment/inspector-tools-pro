@@ -6,13 +6,14 @@ import { serve } from "https://deno.land/std@0.195.0/http/server.ts";
 
 serve(async (req) => {
   if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405 });
-  let body: any;
+  let body: unknown;
   try {
     body = await req.json();
   } catch {
     return json({ error: "Invalid JSON" }, 400);
   }
-  const reportId = typeof body?.reportId === "string" ? body.reportId : null;
+  const b = body as Record<string, unknown>;
+  const reportId = typeof b?.reportId === "string" ? (b.reportId as string) : null;
   if (!reportId) return json({ error: "reportId is required" }, 400);
 
   // Stubbed checkout URL for local/dev testing
@@ -26,4 +27,3 @@ function json(data: unknown, status = 200) {
     headers: { "Content-Type": "application/json" },
   });
 }
-

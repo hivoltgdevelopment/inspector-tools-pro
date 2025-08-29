@@ -121,7 +121,7 @@ export default function ConsentAdmin() {
         />
         <select
           value={status}
-          onChange={(e) => setStatus(e.target.value as any)}
+          onChange={(e) => setStatus(e.target.value as 'all' | 'active' | 'revoked')}
           className="border rounded px-2 py-1"
         >
           <option value="all">All</option>

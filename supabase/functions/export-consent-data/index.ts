@@ -36,7 +36,7 @@ serve(async (req) => {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const role = (userData.user.user_metadata as any)?.role;
+  const role = (userData.user.user_metadata as { role?: string } | null | undefined)?.role;
   if (role !== "admin") {
     return new Response("Forbidden", { status: 403 });
   }

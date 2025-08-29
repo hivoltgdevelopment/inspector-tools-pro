@@ -64,11 +64,11 @@ beforeAll(() => {
       continuous = true;
       interimResults = true;
       lang = 'en-US';
-      onresult: ((event: any) => void) | null = null;
+      onresult: ((event: unknown) => void) | null = null;
       onend: (() => void) | null = null;
       start = vi.fn();
       stop = vi.fn(() => this.onend && this.onend());
-    } as unknown as typeof (window as any).SpeechRecognition;
+    } as unknown as new () => SpeechRecognition;
   };
   if (!(window as any).SpeechRecognition) {
     Object.defineProperty(window as any, 'SpeechRecognition', {
