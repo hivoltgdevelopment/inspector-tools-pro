@@ -258,6 +258,45 @@ Windows users: see CLI install via Scoop in `docs/CLI_SETUP_WINDOWS.md`.
   - Options: `-Action payment` or `-Action export -OutFile consent.csv`
   - Reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from `.env.local`/`env.local` if not supplied.
 
+## Storage (Media)
+
+Set up a bucket to store photos/videos.
+
+1) Create bucket
+- Supabase Dashboard → Storage → Create bucket
+- Name: `media`
+- Access: choose Public (simpler) or Private (more secure)
+
+2) Policies (if Private)
+- Enable RLS on `storage.objects` and add a read policy for authenticated users on the `media` bucket:
+
+  ```sql
+  -- Allow authenticated users to read objects from the 'media' bucket
+  create policy if not exists "auth read media"
+  on storage.objects for select
+  using (
+    bucket_id = 'media' and auth.role() = 'authenticated'
+  );
+
+  -- Allow authenticated users to upload into the 'media' bucket
+  create policy if not exists "auth upload media"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'media' and auth.role() = 'authenticated'
+  );
+  ```
+
+3) CORS (optional)
+- Storage → Settings → CORS: allow your app origin (e.g., `http://localhost:5173` and your prod origin) for `GET,PUT,POST` and headers `authorization,content-type`.
+
+4) Client usage
+- Public bucket: the app uses `getPublicUrl` (no auth needed); simplest for prototyping.
+- Private bucket: use signed URLs. The app includes `uploadMedia(file, { signed: true, expiresInSeconds: 3600 })`, which calls `createSignedUrl` after upload. Ensure users are authenticated and the above policies exist.
+
+Notes
+- For stricter control, generate signed URLs via an Edge Function using the service role instead of the client.
+- Thumbnails: consider a tiny client-side compression step before upload or an Edge Function to generate thumbnails server-side.
+
 ## Security
 
 - Never commit real secrets. Keep real values only in `.env.local` (gitignored) or in Supabase Function Secrets.

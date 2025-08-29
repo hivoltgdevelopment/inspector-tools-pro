@@ -17,7 +17,10 @@ export default function PaymentResult({ kind }: Props) {
           ? 'Thank you! Your payment has been processed.'
           : 'Your payment was canceled. You can try again at any time.'}
       </p>
-      <div>
+      <div className="flex items-center justify-center gap-3">
+        <Link to="/" className="px-4 py-2 rounded border">
+          Back Home
+        </Link>
         <Link to="/portal" className="px-4 py-2 rounded bg-blue-600 text-white">
           Go to Client Portal
         </Link>
@@ -25,4 +28,3 @@ export default function PaymentResult({ kind }: Props) {
     </div>
   );
 }
-

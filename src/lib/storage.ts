@@ -3,7 +3,7 @@
 
 export async function uploadMedia(
   file: File,
-  opts?: { prefix?: string; bucket?: string }
+  opts?: { prefix?: string; bucket?: string; signed?: boolean; expiresInSeconds?: number }
 ): Promise<string> {
   const prefix = opts?.prefix ?? 'inspections';
   const bucket = opts?.bucket ?? 'media';
@@ -28,8 +28,15 @@ export async function uploadMedia(
       // Fallback to mock url if upload fails
       return 'blob:mock-url';
     }
-    const { publicUrl } = client.getPublicUrl(data.path).data;
-    return publicUrl;
+    if (opts?.signed) {
+      const expires = opts.expiresInSeconds ?? 3600;
+      const signed = await client.createSignedUrl(data.path, expires);
+      if (signed.error || !signed.data?.signedUrl) return 'blob:mock-url';
+      return signed.data.signedUrl;
+    } else {
+      const { publicUrl } = client.getPublicUrl(data.path).data;
+      return publicUrl;
+    }
   } catch {
     return 'blob:mock-url';
   }
