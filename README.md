@@ -232,6 +232,17 @@ Implementation tip: The export function should verify admin status from the user
   - Use the service role only in functions; never expose it to the client.
   - The export function requires an authenticated user JWT with `role=admin`.
 
+### Payments (Stripe)
+
+- The `create-payment-session` function integrates with Stripe using REST.
+- Configure Function Secrets (Supabase → Functions → Secrets):
+  - `STRIPE_SECRET_KEY` (required)
+  - `STRIPE_PRICE_ID` (preferred) or `STRIPE_AMOUNT_CENTS` and optional `STRIPE_CURRENCY` (default `usd`)
+  - `SUCCESS_URL` and `CANCEL_URL` (defaults point to example.com)
+- After setting secrets, redeploy:
+  - `supabase functions deploy create-payment-session`
+- Frontend toggle: enable payments UI via `VITE_PAYMENTS_ENABLED=true` in `.env.local` when ready.
+
 Windows users: see CLI install via Scoop in `docs/CLI_SETUP_WINDOWS.md`.
 
 ### Quick Tester Script (PowerShell)
