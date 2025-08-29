@@ -248,6 +248,13 @@ Implementation tip: The export function should verify admin status from the user
   - `supabase functions deploy create-payment-session`
 - Frontend toggle: enable payments UI via `VITE_PAYMENTS_ENABLED=true` in `.env.local` when ready.
 
+Dev testing without Stripe
+- You can exercise the full button → redirect flow without live Stripe by configuring the function to return a fake URL:
+  - In Supabase Function Secrets for `create-payment-session` set:
+    - `DEV_FAKE_CHECKOUT=true`
+    - (optional) `DEV_CHECKOUT_URL=http://localhost:8080/payment/success?mock=1`
+  - Redeploy the function. The app will navigate to the provided URL on “Pay invoice”.
+
 Notes:
 - If you see “You specified `payment` mode but passed a recurring price”, either:
   - Switch to a one‑time price (create a Price without a recurring interval), or

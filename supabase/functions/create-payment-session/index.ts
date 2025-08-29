@@ -6,6 +6,7 @@ import { serve } from "https://deno.land/std@0.195.0/http/server.ts";
 
 // Stripe server integration using REST API from Deno (no Node SDK required)
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
+const DEV_FAKE_CHECKOUT = (Deno.env.get("DEV_FAKE_CHECKOUT") ?? "").toLowerCase() === "true";
 const STRIPE_PRICE_ID = Deno.env.get("STRIPE_PRICE_ID"); // optional, prefer price-based sessions
 const STRIPE_AMOUNT_CENTS = Deno.env.get("STRIPE_AMOUNT_CENTS"); // fallback if no price id
 const STRIPE_CURRENCY = Deno.env.get("STRIPE_CURRENCY") ?? "usd";
@@ -24,6 +25,11 @@ function withCors(res: Response) {
 serve(async (req) => {
   if (req.method === "OPTIONS") return withCors(new Response(null, { status: 204 }));
   if (req.method !== "POST") return withCors(new Response("Method Not Allowed", { status: 405 }));
+  // Dev short‑circuit: allow exercising the flow without Stripe
+  if (DEV_FAKE_CHECKOUT) {
+    const fake = Deno.env.get("DEV_CHECKOUT_URL") ?? (SUCCESS_URL || "https://example.com/success");
+    return withCors(json({ url: fake }, 200));
+  }
   if (!STRIPE_SECRET_KEY) {
     return withCors(json({ error: "Stripe not configured (STRIPE_SECRET_KEY missing)" }, 500));
   }
