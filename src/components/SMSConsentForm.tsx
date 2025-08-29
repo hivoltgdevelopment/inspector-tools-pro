@@ -59,12 +59,18 @@ export default function SMSConsentForm() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({ name, phone: normalizeToE164(phone, '+1') || toE164(phone) || phone, consent: true }),
       });
       if (!res.ok) {
-        throw new Error('Failed to save consent.');
+        let details = '';
+        try {
+          const data = await res.json();
+          details = (data && (data.error || data.message)) || '';
+        } catch {}
+        throw new Error(details ? `Failed to save consent. ${details}` : 'Failed to save consent.');
       }
       setSuccess('Consent recorded successfully.');
       toast.success('Consent recorded successfully.');
