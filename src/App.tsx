@@ -8,6 +8,7 @@ import RequireRole from './components/RequireRole';
 import { supabase } from './lib/supabase';
 import NotAuthorized from './components/NotAuthorized';
 import PaymentResult from './components/PaymentResult';
+import OfflinePage from './components/OfflinePage';
 
 export default function App() {
   const [authed, setAuthed] = useState(false);
@@ -69,6 +70,7 @@ export default function App() {
           }
         />
         <Route path="/not-authorized" element={<NotAuthorized />} />
+        <Route path="/offline" element={<OfflinePage />} />
         <Route path="/payment/success" element={<PaymentResult kind="success" />} />
         <Route path="/payment/cancel" element={<PaymentResult kind="cancel" />} />
       </Routes>

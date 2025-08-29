@@ -48,6 +48,11 @@ npm run deploy
 - Installable on mobile devices
 - All app store metadata included
 
+Offline fallback
+- Visit `/offline` to see the offline status page used in-app.
+- The service worker uses `autoUpdate`; new versions install in the background and apply on next load.
+- Icons in `manifest.webmanifest` point to a placeholder SVG in development; replace with real PNG icons before store submission.
+
 ### Development
 ```bash
 npm install
