@@ -237,11 +237,17 @@ Implementation tip: The export function should verify admin status from the user
 - The `create-payment-session` function integrates with Stripe using REST.
 - Configure Function Secrets (Supabase → Functions → Secrets):
   - `STRIPE_SECRET_KEY` (required)
+  - `STRIPE_MODE` = `payment` (default) or `subscription`
   - `STRIPE_PRICE_ID` (preferred) or `STRIPE_AMOUNT_CENTS` and optional `STRIPE_CURRENCY` (default `usd`)
   - `SUCCESS_URL` and `CANCEL_URL` (defaults point to example.com)
 - After setting secrets, redeploy:
   - `supabase functions deploy create-payment-session`
 - Frontend toggle: enable payments UI via `VITE_PAYMENTS_ENABLED=true` in `.env.local` when ready.
+
+Notes:
+- If you see “You specified `payment` mode but passed a recurring price”, either:
+  - Switch to a one‑time price (create a Price without a recurring interval), or
+  - Set `STRIPE_MODE=subscription` and use a recurring `STRIPE_PRICE_ID`.
 
 Windows users: see CLI install via Scoop in `docs/CLI_SETUP_WINDOWS.md`.
 
