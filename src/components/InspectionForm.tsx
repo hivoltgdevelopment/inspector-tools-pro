@@ -57,13 +57,17 @@ export default function InspectionForm({ onSubmitted }: Props) {
     if (!voiceEnabled) {
       if (recognitionRef.current) {
         recognitionRef.current.stop();
-        recognitionRef.current = null as any;
+        recognitionRef.current = null;
       }
       return;
     }
-    const SRCtor = ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) as
-      | (new () => SpeechRecognition)
-      | undefined;
+    type SpeechRecognitionConstructor = new () => SpeechRecognition;
+    const w = window as unknown as {
+      SpeechRecognition?: SpeechRecognitionConstructor;
+      webkitSpeechRecognition?: SpeechRecognitionConstructor;
+    };
+    const SRCtor: SpeechRecognitionConstructor | undefined =
+      w.SpeechRecognition ?? w.webkitSpeechRecognition;
     if (!SRCtor) return; // unsupported; UI still shows toggle but no effect
 
     const rec: SpeechRecognition = new SRCtor();
