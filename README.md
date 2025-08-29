@@ -65,6 +65,17 @@ Accessibility audit (optional)
   - Or inline: `VITE_A11Y_AUDIT=true npm run dev`
 - The app loads `axe-core` from a CDN at runtime and logs violations to the console (collapsed group labeled `[a11y]`).
 
+Error telemetry (optional)
+- Disabled by default; enable explicitly via env if you want to send errors to a provider like Sentry.
+  - `.env.local`:
+    ```ini
+    VITE_TELEMETRY_ENABLED=true
+    VITE_SENTRY_DSN=<your-sentry-dsn>
+    VITE_RELEASE=v0.1.0
+    ```
+  - If `VITE_SENTRY_DSN` is present and telemetry is enabled, the app tries to lazy‑load `@sentry/browser` at runtime. If the package is not installed, it falls back to a no‑op.
+  - Global handlers for `window.onerror` and `unhandledrejection` are attached.
+
 #### Skipping SMS login during development
 
 Create a `.env` file and set `VITE_SKIP_AUTH=true` to bypass the SMS authentication flow and render the protected screens directly.

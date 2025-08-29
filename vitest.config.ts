@@ -14,6 +14,9 @@ export default defineConfig({
     setupFiles: ['test/setupTests.ts'],
     globals: true,
     css: true,
+    env: {
+      VITE_TELEMETRY_ENABLED: 'false',
+    },
     exclude: ['e2e/**', 'node_modules/**', 'dist/**'],
     server: {
       deps: {
