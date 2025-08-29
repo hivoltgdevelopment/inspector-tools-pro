@@ -39,6 +39,8 @@ E2E_BASE_URL=http://localhost:5173 npm run test:e2e
 
 - `sms-auth.spec.ts`
   - Validates consent requirement and phone format (no network calls required).
+- `sms-consent.spec.ts`
+  - Intercepts `POST /functions/v1/save-sms-consent` and `POST /auth/v1/otp` to simulate a happy path advancing to OTP stage.
 - `inspection-form.spec.ts`
   - Emulates offline, uploads a file, and verifies that submitting offline clears the media list.
 - `client-portal.spec.ts`
