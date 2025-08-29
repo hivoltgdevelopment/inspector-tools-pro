@@ -54,6 +54,12 @@ npm install
 npm run dev
 ```
 
+Accessibility audit (optional)
+- To run a quick accessibility sweep in dev, enable the audit flag and reload:
+  - In `.env.local`: `VITE_A11Y_AUDIT=true`
+  - Or inline: `VITE_A11Y_AUDIT=true npm run dev`
+- The app loads `axe-core` from a CDN at runtime and logs violations to the console (collapsed group labeled `[a11y]`).
+
 #### Skipping SMS login during development
 
 Create a `.env` file and set `VITE_SKIP_AUTH=true` to bypass the SMS authentication flow and render the protected screens directly.
