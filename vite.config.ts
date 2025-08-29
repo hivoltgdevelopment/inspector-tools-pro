@@ -63,7 +63,7 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       devOptions: {
-        enabled: mode === 'development',
+        enabled: false, // disable SW in dev to avoid noisy fetch errors
         type: 'module'
       },
       manifest: {
