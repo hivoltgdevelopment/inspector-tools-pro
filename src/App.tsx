@@ -38,7 +38,7 @@ export default function App() {
   }
 
   // Use Vite base (e.g., '/inspector-tools/') so GH Pages subpath routing works
-  const base = (import.meta as any).env?.BASE_URL || '/';
+  const base = import.meta.env.BASE_URL || '/';
   return (
     <BrowserRouter basename={base}>
       <Routes>

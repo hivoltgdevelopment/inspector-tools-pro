@@ -9,24 +9,12 @@ export async function uploadMedia(
   const bucket = opts?.bucket ?? 'media';
 
   // If running under vitest or without Vite env, bail out with mock url
-  const isTest = (import.meta as any)?.env?.MODE === 'test';
+  const isTest = import.meta.env.MODE === 'test';
   if (isTest) return 'blob:mock-url';
 
   try {
     // Lazy import to avoid crashing tests when env is absent
-    const mod = await import('./supabase');
-    const supabase = (mod as any).supabase as {
-      storage: {
-        from: (bucket: string) => {
-          upload: (
-            path: string,
-            file: File,
-            opts?: { cacheControl?: string; upsert?: boolean; contentType?: string }
-          ) => Promise<{ data: { path: string } | null; error: { message: string } | null }>
-          getPublicUrl: (path: string) => { data: { publicUrl: string } }
-        };
-      };
-    };
+    const { supabase } = await import('./supabase');
     const ext = file.name.split('.').pop() || 'bin';
     const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const path = `${prefix}/${name}`;
@@ -46,4 +34,3 @@ export async function uploadMedia(
     return 'blob:mock-url';
   }
 }
-
