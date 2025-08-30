@@ -15,7 +15,8 @@ try {
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: './', // Use relative paths for GitHub Pages
+  // Default to root base for standard builds and preview; override via CLI for GH Pages
+  base: '/',
   server: {
     host: "::",
     port: 8080,
