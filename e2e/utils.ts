@@ -151,6 +151,13 @@ export async function gotoPaymentResult(page: Page, kind: 'success' | 'cancel') 
   await page.goto(`/payment/${kind}`);
 }
 
+export async function gotoHome(page: Page, opts?: { rbacOff?: boolean }) {
+  const params = new URLSearchParams();
+  if (opts?.rbacOff) params.set('rbac', 'off');
+  const query = params.toString();
+  await page.goto(`/${query ? `?${query}` : ''}`);
+}
+
 export async function stubSaveSmsConsentSuccess(page: Page) {
   await page.route('**/functions/v1/save-sms-consent', async (route) => {
     const req = route.request();

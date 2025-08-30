@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { gotoHome } from './utils';
 import path from 'path';
 
 test.describe('Inspection Form (offline submit)', () => {
   test('queues offline submission and clears media list', async ({ page, context }) => {
     // This route is gated by RequireRole. Run dev with VITE_SKIP_AUTH=true to bypass SMS login.
-    await page.goto('/?rbac=off');
+    await gotoHome(page, { rbacOff: true });
     await page.getByLabel('Property address').waitFor({ state: 'visible', timeout: 20000 });
 
     // Emulate offline
@@ -35,7 +36,7 @@ test.describe('Inspection Form (offline submit)', () => {
   });
 
   test('flushes queued items after reconnect and shows toast', async ({ page, context }) => {
-    await page.goto('/?rbac=off');
+    await gotoHome(page, { rbacOff: true });
     await page.getByLabel('Property address').waitFor({ state: 'visible', timeout: 20000 });
 
     // Go offline

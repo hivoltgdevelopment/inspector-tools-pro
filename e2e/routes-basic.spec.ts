@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { gotoNotAuthorized, gotoPaymentResult, gotoPortal } from './utils';
+import { gotoNotAuthorized, gotoPaymentResult, gotoPortal, gotoHome } from './utils';
 
 test.describe('Static routes', () => {
   test('Not Authorized screen renders with actions', async ({ page }) => {
