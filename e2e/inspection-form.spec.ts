@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { gotoHome } from './utils';
-import path from 'path';
+import { join } from 'path';
 
 test.describe('Inspection Form (offline submit)', () => {
   test('queues offline submission and clears media list', async ({ page, context }) => {
@@ -23,7 +23,7 @@ test.describe('Inspection Form (offline submit)', () => {
     await page.getByLabel('Property address').fill('123 Desert Vista Dr');
 
     // Upload one file
-    const fixture = path.join(process.cwd(), 'e2e', 'fixtures', 'offline.png');
+    const fixture = join(process.cwd(), 'e2e', 'fixtures', 'offline.png');
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles(fixture);
     await expect(page.getByText('offline.png')).toBeVisible();
@@ -48,7 +48,7 @@ test.describe('Inspection Form (offline submit)', () => {
 
     await page.getByLabel('Property address').fill('456 Canyon Rd');
     // Attach two files to simulate multi-item queue
-    const fixture = path.join(process.cwd(), 'e2e', 'fixtures', 'offline.png');
+    const fixture = join(process.cwd(), 'e2e', 'fixtures', 'offline.png');
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles([fixture, fixture]);
     // Install a test hook to count submissions
