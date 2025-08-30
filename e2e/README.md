@@ -56,6 +56,9 @@ E2E_BASE_URL=http://localhost:5173 npm run test:e2e
   - Stubs the blob download by wrapping `URL.createObjectURL` and `<a>.click()` to assert
     both the filename (`consent-data.csv`) and CSV content.
   - Navigates to `/admin/consent?rbac=off` to bypass RBAC checks for the test run.
+  - Also includes negative-path and actions:
+    - Export failure (500) shows a toast error.
+    - Revoke flow confirms, calls PATCH on `sms_consent`, and shows a success toast with UI update.
 
 ## Notes
 

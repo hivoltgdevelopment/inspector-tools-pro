@@ -110,3 +110,75 @@ test.describe('Consent Admin Export (happy path)', () => {
     expect(downloaded.csv).toBe(csv);
   });
 });
+
+test.describe('Consent Admin negative and actions', () => {
+  test('shows error toast when export fails', async ({ page }) => {
+    // Seed auth and records
+    await page.route('**/auth/v1/user**', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'admin-user' }) });
+    });
+    await page.route('**/rest/v1/sms_consent**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { id: 'c1', created_at: '2025-01-01T00:00:00Z', full_name: 'John Doe', phone_number: '+15555550123', consent_given: true },
+        ]),
+      });
+    });
+    // Fail the export endpoint
+    await page.route('**/functions/v1/export-consent-data', async (route) => {
+      await route.fulfill({ status: 500, headers: { 'content-type': 'text/plain' }, body: 'error' });
+    });
+
+    await page.goto('/admin/consent?rbac=off');
+    await expect(page.getByRole('heading', { name: 'Consent Admin Dashboard' })).toBeVisible();
+    await page.getByRole('button', { name: 'Export CSV' }).click();
+    await expect(page.getByText('Failed to export consent data')).toBeVisible();
+  });
+
+  test('revokes consent and shows success toast', async ({ page }) => {
+    // Single handler for GET and PATCH on sms_consent
+    await page.route('**/rest/v1/sms_consent**', async (route) => {
+      const method = route.request().method();
+      if (method === 'GET') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([
+            { id: 'c1', created_at: '2025-01-01T00:00:00Z', full_name: 'John Doe', phone_number: '+15555550123', consent_given: true },
+          ]),
+        });
+        return;
+      }
+      if (method === 'PATCH') {
+        // Return updated row
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([
+            { id: 'c1', consent_given: false },
+          ]),
+        });
+        return;
+      }
+      // Fallback
+      await route.continue();
+    });
+    await page.route('**/auth/v1/user**', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'admin-user' }) });
+    });
+
+    await page.goto('/admin/consent?rbac=off');
+    await expect(page.getByText('John Doe')).toBeVisible();
+    // Open confirm dialog via Revoke action
+    await page.getByRole('button', { name: 'Revoke' }).click();
+    // Confirm revoke
+    await page.getByRole('button', { name: 'Revoke' }).last().click();
+    // Success toast and UI reflects revoked status
+    await expect(page.getByText('Consent revoked')).toBeVisible();
+    await expect(page.getByText('Revoked')).toBeVisible();
+    // Revoke button should no longer be present for that row
+    await expect(page.getByRole('button', { name: 'Revoke' })).toHaveCount(0);
+  });
+});
