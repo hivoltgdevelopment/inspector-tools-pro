@@ -18,10 +18,18 @@ export default function PaymentResult({ kind }: Props) {
           : 'Your payment was canceled. You can try again at any time.'}
       </p>
       <div className="flex items-center justify-center gap-3">
-        <Link to="/" className="px-4 py-2 rounded border">
+        <Link
+          to="/"
+          className="px-4 py-2 rounded border"
+          data-testid="payment-back-home"
+        >
           Back Home
         </Link>
-        <Link to="/portal" className="px-4 py-2 rounded bg-blue-600 text-white">
+        <Link
+          to="/portal"
+          className="px-4 py-2 rounded bg-blue-600 text-white"
+          data-testid="payment-portal-link"
+        >
           Go to Client Portal
         </Link>
       </div>

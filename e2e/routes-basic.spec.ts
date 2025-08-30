@@ -13,9 +13,12 @@ test.describe('Static routes', () => {
     await page.goto('/payment/success');
     await expect(page.getByTestId('payment-container')).toBeVisible();
     await expect(page.getByTestId('payment-heading')).toHaveText('Payment Successful');
+    await expect(page.getByTestId('payment-back-home')).toBeVisible();
+    await expect(page.getByTestId('payment-portal-link')).toBeVisible();
 
     await page.goto('/payment/cancel');
     await expect(page.getByTestId('payment-heading')).toHaveText('Payment Canceled');
+    await expect(page.getByTestId('payment-back-home')).toBeVisible();
+    await expect(page.getByTestId('payment-portal-link')).toBeVisible();
   });
 });
-
