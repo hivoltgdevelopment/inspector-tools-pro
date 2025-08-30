@@ -14,10 +14,11 @@ try {
 }
 
 // Optional bundle visualizer (local analysis only)
-let visualizer: undefined | ((opts?: any) => any);
+type VisualizerFn = (opts?: Record<string, unknown>) => unknown;
+let visualizer: VisualizerFn | undefined;
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  visualizer = require('rollup-plugin-visualizer').visualizer;
+  const mod: { visualizer: VisualizerFn } = require('rollup-plugin-visualizer');
+  visualizer = mod.visualizer;
 } catch (_) {
   visualizer = undefined;
 }
