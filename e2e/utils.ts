@@ -123,3 +123,28 @@ export async function waitForDownloadInfo(page: Page): Promise<DownloadInfo> {
   });
 }
 
+export async function stubSaveSmsConsentSuccess(page: Page) {
+  await page.route('**/functions/v1/save-sms-consent', async (route) => {
+    const req = route.request();
+    let ok = false;
+    try {
+      const body = req.postDataJSON() as unknown;
+      if (body && typeof body === 'object' && 'phone' in (body as Record<string, unknown>)) {
+        ok = true;
+      }
+    } catch (_) {
+      ok = false;
+    }
+    if (!ok) {
+      await route.fulfill({ status: 400 });
+      return;
+    }
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+  });
+}
+
+export async function stubOtpSuccess(page: Page) {
+  await page.route('**/auth/v1/otp**', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({}) });
+  });
+}
