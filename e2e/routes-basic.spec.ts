@@ -7,6 +7,11 @@ test.describe('Static routes', () => {
     await expect(page.getByTestId('notauth-heading')).toHaveText('Not Authorized');
     await expect(page.getByTestId('notauth-portal-link')).toBeVisible();
     await expect(page.getByTestId('notauth-signout')).toBeVisible();
+
+    // Navigate to client portal via link
+    await page.getByTestId('notauth-portal-link').click();
+    await expect(page).toHaveURL(/\/portal/);
+    await expect(page.getByTestId('portal-heading')).toBeVisible();
   });
 
   test('Payment result screens (success and cancel)', async ({ page }) => {
@@ -16,9 +21,18 @@ test.describe('Static routes', () => {
     await expect(page.getByTestId('payment-back-home')).toBeVisible();
     await expect(page.getByTestId('payment-portal-link')).toBeVisible();
 
+    // Back home navigates to root
+    await page.getByTestId('payment-back-home').click();
+    await expect(page).toHaveURL(/\/$/);
+    // Go to cancel page and click portal link
     await page.goto('/payment/cancel');
+    
     await expect(page.getByTestId('payment-heading')).toHaveText('Payment Canceled');
     await expect(page.getByTestId('payment-back-home')).toBeVisible();
     await expect(page.getByTestId('payment-portal-link')).toBeVisible();
+
+    await page.getByTestId('payment-portal-link').click();
+    await expect(page).toHaveURL(/\/portal/);
+    await expect(page.getByTestId('portal-heading')).toBeVisible();
   });
 });

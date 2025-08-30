@@ -33,4 +33,28 @@ test.describe('Inspection Form (offline submit)', () => {
     // Media list should clear after offline submit
     await expect(page.getByText('offline.png')).toHaveCount(0);
   });
+
+  test('flushes queued items after reconnect and shows toast', async ({ page, context }) => {
+    await page.goto('/?rbac=off');
+    await page.getByLabel('Property address').waitFor({ state: 'visible', timeout: 20000 });
+
+    // Go offline
+    await context.setOffline(true);
+    await page.addInitScript(() => {
+      Object.defineProperty(window.navigator, 'onLine', { value: false, configurable: true });
+      window.dispatchEvent(new Event('offline'));
+    });
+
+    await page.getByLabel('Property address').fill('456 Canyon Rd');
+    await page.getByRole('button', { name: /submit inspection/i }).click();
+
+    // Go back online; app should toast and attempt to flush
+    await context.setOffline(false);
+    await page.addInitScript(() => {
+      Object.defineProperty(window.navigator, 'onLine', { value: true, configurable: true });
+      window.dispatchEvent(new Event('online'));
+    });
+
+    await expect(page.getByText('Back online. Syncing queued items…')).toBeVisible();
+  });
 });
