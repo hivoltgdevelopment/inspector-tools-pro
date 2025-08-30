@@ -70,7 +70,6 @@ export default function SMSConsentForm() {
           details = (data && (data.error || data.message)) || '';
         } catch (_err) {
           if (import.meta.env.DEV) {
-            // eslint-disable-next-line no-console
             console.debug('[SMSConsentForm] non-JSON error response');
           }
         }

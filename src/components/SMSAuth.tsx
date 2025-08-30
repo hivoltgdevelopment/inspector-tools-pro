@@ -29,7 +29,6 @@ export default function SMSAuth() {
         details = (data && (data.error || data.message)) || '';
       } catch (_err) {
         if (import.meta.env.DEV) {
-          // eslint-disable-next-line no-console
           console.debug('[SMSAuth] non-JSON error response');
         }
       }

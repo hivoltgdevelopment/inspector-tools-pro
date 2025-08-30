@@ -27,7 +27,9 @@ export default function ClientPortal() {
     const ls = localStorage.getItem('payments_enabled');
     if (ls === 'true') paymentsEnabled = true;
     if (ls === 'false') paymentsEnabled = false;
-  } catch {}
+  } catch (_e) {
+    // Ignore invalid URL in non-browser environments
+  }
 
   useEffect(() => {
     const load = async () => {
@@ -50,7 +52,9 @@ export default function ClientPortal() {
             ]);
             return;
           }
-        } catch {}
+        } catch (_e) {
+          // Ignore invalid URL in non-browser environments
+        }
       }
 
       if (!userId) {
