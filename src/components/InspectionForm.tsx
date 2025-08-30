@@ -176,6 +176,9 @@ export default function InspectionForm({ onSubmitted }: Props) {
         }
         setUploadedUrls(urls);
         const { id } = await submitInspectionApi({ values, media });
+        try {
+          (window as unknown as { __onSubmitted?: (id: string, mode: 'online'|'flush'|'offline') => void }).__onSubmitted?.(id, 'online');
+        } catch (_e) {}
 
         // If we still maintain a queue for resilience, flush after success
         if (queue?.flushQueue) {
@@ -186,6 +189,9 @@ export default function InspectionForm({ onSubmitted }: Props) {
             await uploadMedia(toUpload, { signed: true }).catch(() => '');
             const metaValues = (item.meta && (item.meta as { values?: InspectionFormValues }).values) || values;
             await submitInspectionApi({ values: metaValues, media: [item.file] });
+            try {
+              (window as unknown as { __onSubmitted?: (id: string, mode: 'online'|'flush'|'offline') => void }).__onSubmitted?.(item.id, 'flush');
+            } catch (_e) {}
           });
         }
 
@@ -208,7 +214,11 @@ export default function InspectionForm({ onSubmitted }: Props) {
             });
           }
         }
-        onSubmitted?.(crypto.randomUUID());
+        const offlineId = crypto.randomUUID();
+        onSubmitted?.(offlineId);
+        try {
+          (window as unknown as { __onSubmitted?: (id: string, mode: 'online'|'flush'|'offline') => void }).__onSubmitted?.(offlineId, 'offline');
+        } catch (_e) {}
         setMedia([]);
         setUploadedUrls([]);
         setUploadProgress({ done: 0, total: 0 });

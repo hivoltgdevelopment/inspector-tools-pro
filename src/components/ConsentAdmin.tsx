@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
-import { Toaster, toast } from 'sonner';
+import { toast } from 'sonner';
 import { supabase } from '../lib/supabase';
 
 type ConsentRecord = {
@@ -109,7 +109,6 @@ export default function ConsentAdmin() {
 
   return (
     <div className="border rounded p-4" data-testid="consent-admin">
-      <Toaster position="top-right" />
       <h2 className="font-bold mb-4" data-testid="consent-heading">Consent Admin Dashboard</h2>
       <div className="flex items-center gap-2 mb-4">
         <input

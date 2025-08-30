@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { gotoHome } from './utils';
 import path from 'path';
+import path from 'path';
 
 test.describe('Inspection Form (offline submit)', () => {
   test('queues offline submission and clears media list', async ({ page, context }) => {
@@ -47,6 +48,18 @@ test.describe('Inspection Form (offline submit)', () => {
     });
 
     await page.getByLabel('Property address').fill('456 Canyon Rd');
+    // Attach two files to simulate multi-item queue
+    const fixture = path.join(process.cwd(), 'e2e', 'fixtures', 'offline.png');
+    const fileInput = page.locator('input[type="file"]');
+    await fileInput.setInputFiles([fixture, fixture]);
+    // Install a test hook to count submissions
+    await page.addInitScript(() => {
+      (window as unknown as { __submitCounts?: Record<string, number>; __onSubmitted?: (id: string, mode: 'online'|'flush'|'offline') => void }).__submitCounts = { online: 0, flush: 0, offline: 0 } as any;
+      (window as unknown as { __submitCounts?: Record<string, number>; __onSubmitted?: (id: string, mode: 'online'|'flush'|'offline') => void }).__onSubmitted = (_id, mode) => {
+        const w = window as unknown as { __submitCounts: Record<string, number> };
+        w.__submitCounts[mode] = (w.__submitCounts[mode] ?? 0) + 1;
+      };
+    });
     await page.getByRole('button', { name: /submit inspection/i }).click();
 
     // Go back online; app should toast and attempt to flush
@@ -57,5 +70,10 @@ test.describe('Inspection Form (offline submit)', () => {
     });
 
     await expect(page.getByText('Back online. Syncing queued items…')).toBeVisible();
+    // Wait for two flush submissions
+    await page.waitForFunction(() => {
+      const w = window as unknown as { __submitCounts?: Record<string, number> };
+      return !!w.__submitCounts && w.__submitCounts.flush >= 2;
+    });
   });
 });

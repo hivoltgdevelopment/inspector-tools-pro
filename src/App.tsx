@@ -2,6 +2,7 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import RequireRole from './components/RequireRole';
 import { supabase } from './lib/supabase';
+import { Toaster } from 'sonner';
 
 const InspectionForm = React.lazy(() => import('./components/InspectionForm'));
 const SMSAuth = React.lazy(() => import('./components/SMSAuth'));
@@ -45,6 +46,7 @@ export default function App() {
   const base = import.meta.env.BASE_URL || '/';
   return (
     <BrowserRouter basename={base}>
+      <Toaster position="top-right" data-testid="toast-container" />
       <Suspense fallback={<div className="p-4">Loading…</div>}>
       <Routes>
         <Route
