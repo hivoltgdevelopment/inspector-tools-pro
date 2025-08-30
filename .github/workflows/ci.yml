@@ -94,3 +94,12 @@ jobs:
           E2E_BASE_URL: http://localhost:4173
           E2E_SKIP_AUTH: 'true'
         run: npx playwright test
+
+      - name: Upload Playwright results (traces, videos, screenshots)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: test-results
+          if-no-files-found: warn
+          retention-days: 7
