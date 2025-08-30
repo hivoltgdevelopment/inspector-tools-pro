@@ -16,6 +16,7 @@ test.describe('Client Portal extended flows', () => {
     await expect(page.getByTestId('portal-heading')).toBeVisible();
     await page.getByTestId('portal-search').fill('zzzzzz');
     await expect(page.locator('[data-testid="portal-list"] li')).toHaveCount(0);
+    await expect(page.getByTestId('portal-empty')).toBeVisible();
   });
 
   test('lists reports via REST and filters (success path)', async ({ page }) => {

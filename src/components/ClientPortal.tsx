@@ -113,6 +113,11 @@ export default function ClientPortal() {
           </li>
         ))}
       </ul>
+      {filtered.length === 0 && (
+        <p className="mt-4 text-sm text-gray-600" data-testid="portal-empty">
+          No reports found.
+        </p>
+      )}
       <p className="text-xs text-gray-600 mt-6">
         Inspection reports are provided for informational purposes only and do
         not constitute legal or financial advice.
