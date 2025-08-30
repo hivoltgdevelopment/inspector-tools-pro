@@ -77,7 +77,7 @@ export default function ClientPortal() {
   }, []);
 
   if (error) {
-    return <p className="text-red-600">{error}</p>;
+    return <p className="text-red-600" data-testid="portal-error">{error}</p>;
   }
 
   const filtered = reports.filter((r) =>
@@ -86,7 +86,7 @@ export default function ClientPortal() {
 
   return (
     <div className="max-w-xl mx-auto p-4 bg-white shadow rounded">
-      <h2 className="font-bold mb-4 text-xl">My Reports</h2>
+      <h2 className="font-bold mb-4 text-xl" data-testid="portal-heading">My Reports</h2>
       <input
         type="search"
         placeholder="Search reports..."
@@ -94,8 +94,9 @@ export default function ClientPortal() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         className="border p-2 mb-4 w-full rounded"
+        data-testid="portal-search"
       />
-      <ul className="divide-y">
+      <ul className="divide-y" data-testid="portal-list">
         {filtered.map((r) => (
           <li key={r.id} className="py-3 flex items-center justify-between">
             <span>{r.title}</span>
