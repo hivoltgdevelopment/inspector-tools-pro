@@ -136,6 +136,13 @@ export async function gotoPortal(
   await page.goto(`/portal${query ? `?${query}` : ''}`);
 }
 
+export async function gotoAdminConsent(page: Page, opts?: { rbacOff?: boolean }) {
+  const params = new URLSearchParams();
+  if (opts?.rbacOff !== false) params.set('rbac', 'off');
+  const query = params.toString();
+  await page.goto(`/admin/consent${query ? `?${query}` : ''}`);
+}
+
 export async function stubSaveSmsConsentSuccess(page: Page) {
   await page.route('**/functions/v1/save-sms-consent', async (route) => {
     const req = route.request();

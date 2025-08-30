@@ -9,6 +9,7 @@ import {
   addDownloadCapture,
   waitForDownloadInfo,
   type DownloadInfo,
+  gotoAdminConsent,
 } from './utils';
 
 test.describe('Consent Admin Export (happy path)', () => {
@@ -27,7 +28,7 @@ test.describe('Consent Admin Export (happy path)', () => {
     await addDownloadCapture(page);
 
     // Navigate with RBAC bypass for test determinism
-    await page.goto('/admin/consent?rbac=off');
+    await gotoAdminConsent(page);
     await expect(page.getByRole('heading', { name: 'Consent Admin Dashboard' })).toBeVisible();
     await expect(page.getByText('John Doe')).toBeVisible();
     await expect(page.getByText('Jane Roe')).toBeVisible();
@@ -59,7 +60,7 @@ test.describe('Consent Admin negative and actions', () => {
     // Fail the export endpoint
     await stubExportFail(page);
 
-    await page.goto('/admin/consent?rbac=off');
+    await gotoAdminConsent(page);
     await expect(page.getByRole('heading', { name: 'Consent Admin Dashboard' })).toBeVisible();
     await page.getByRole('button', { name: 'Export CSV' }).click();
     await expect(page.getByText('Failed to export consent data')).toBeVisible();
@@ -73,7 +74,7 @@ test.describe('Consent Admin negative and actions', () => {
     await stubConsentPatchSuccess(page, [{ id: 'c1', consent_given: false }]);
     await stubAuthUser(page, { id: 'admin-user' });
 
-    await page.goto('/admin/consent?rbac=off');
+    await gotoAdminConsent(page);
     await expect(page.getByText('John Doe')).toBeVisible();
     // Open confirm dialog via Revoke action
     await page.getByRole('button', { name: 'Revoke' }).click();

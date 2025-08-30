@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { stubAuthUser, stubConsentList } from './utils';
+import { stubAuthUser, stubConsentList, gotoAdminConsent } from './utils';
 
 test.describe('Consent Admin filters + view modal', () => {
   test('filters by search and status, and shows view modal details', async ({ page }) => {
@@ -10,7 +10,7 @@ test.describe('Consent Admin filters + view modal', () => {
     ]);
     await stubAuthUser(page, { id: 'admin' });
 
-    await page.goto('/admin/consent?rbac=off');
+    await gotoAdminConsent(page);
     await expect(page.getByTestId('consent-heading')).toBeVisible();
 
     // Search filter
