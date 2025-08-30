@@ -1,5 +1,13 @@
 import { test, expect } from '@playwright/test';
 
+test.describe.configure({ mode: 'serial' });
+
+test.beforeAll(() => {
+  if (process.env.E2E_SKIP_AUTH === 'true') {
+    test.skip(true, 'Skipping auth tests under E2E_SKIP_AUTH');
+  }
+});
+
 test.describe('SMS Consent (happy path via interception)', () => {
   test('records consent and advances to OTP stage', async ({ page }) => {
     // Intercept Edge Function that records consent

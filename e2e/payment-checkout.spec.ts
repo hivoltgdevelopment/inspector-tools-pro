@@ -12,11 +12,10 @@ test.describe('Payment checkout (fake mode)', () => {
       });
     });
 
-    await page.goto('/portal?payments=true&demo=1');
+    await page.goto('/portal?payments=true&demo=1&client=test');
     await page.getByText('Pay invoice').first().click();
 
     await expect(page).toHaveURL(/\/payment\/success\?mock=1/);
     await expect(page.getByText(/success/i)).toBeVisible();
   });
 });
-

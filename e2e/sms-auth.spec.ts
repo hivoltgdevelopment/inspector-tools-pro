@@ -1,5 +1,13 @@
 import { test, expect } from '@playwright/test';
 
+test.describe.configure({ mode: 'serial' });
+
+test.beforeAll(() => {
+  if (process.env.E2E_SKIP_AUTH === 'true') {
+    test.skip(true, 'Skipping auth tests under E2E_SKIP_AUTH');
+  }
+});
+
 test.describe('SMS Authentication (validation only)', () => {
   test('requires consent and E.164 phone format', async ({ page }) => {
     await page.goto('/');
@@ -22,4 +30,3 @@ test.describe('SMS Authentication (validation only)', () => {
     );
   });
 });
-

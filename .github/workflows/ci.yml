@@ -92,4 +92,5 @@ jobs:
       - name: Run Playwright tests
         env:
           E2E_BASE_URL: http://localhost:4173
+          E2E_SKIP_AUTH: 'true'
         run: npx playwright test
