@@ -26,7 +26,8 @@ test.describe('Client Portal (list + search)', () => {
       });
     });
 
-    await page.goto('/portal');
+    // Provide a client id via query param to bypass auth in dev
+    await page.goto('/portal?client=test');
 
     await expect(page.getByRole('heading', { name: 'My Reports' })).toBeVisible();
     await expect(page.getByText('Roof Report')).toBeVisible();
@@ -37,4 +38,3 @@ test.describe('Client Portal (list + search)', () => {
     await expect(page.getByText('Basement Report')).toBeVisible();
   });
 });
-
