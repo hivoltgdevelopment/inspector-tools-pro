@@ -98,7 +98,11 @@ export default function ClientPortal() {
       />
       <ul className="divide-y" data-testid="portal-list">
         {filtered.map((r) => (
-          <li key={r.id} className="py-3 flex items-center justify-between">
+          <li
+            key={r.id}
+            className="py-3 flex items-center justify-between"
+            data-testid={`report-item-${r.id}`}
+          >
             <span>{r.title}</span>
             {paymentsEnabled && <PayInvoiceButton reportId={r.id} />}
           </li>

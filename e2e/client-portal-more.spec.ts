@@ -17,5 +17,26 @@ test.describe('Client Portal extended flows', () => {
     await page.getByTestId('portal-search').fill('zzzzzz');
     await expect(page.locator('[data-testid="portal-list"] li')).toHaveCount(0);
   });
-});
 
+  test('lists reports via REST and filters (success path)', async ({ page }) => {
+    // Intercept with 2 reports
+    await page.route('**/rest/v1/reports**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { id: 'r1', title: 'Roof Report' },
+          { id: 'r2', title: 'Basement Report' },
+        ]),
+      });
+    });
+    await page.goto('/portal?client=test');
+    await expect(page.getByTestId('portal-heading')).toBeVisible();
+    await expect(page.getByTestId('report-item-r1')).toBeVisible();
+    await expect(page.getByTestId('report-item-r2')).toBeVisible();
+
+    await page.getByTestId('portal-search').fill('base');
+    await expect(page.getByTestId('report-item-r1')).toHaveCount(0);
+    await expect(page.getByTestId('report-item-r2')).toBeVisible();
+  });
+});
