@@ -54,10 +54,11 @@ test.describe('Inspection Form (offline submit)', () => {
     await fileInput.setInputFiles([fixture, fixture]);
     // Install a test hook to count submissions
     await page.addInitScript(() => {
-      (window as unknown as { __submitCounts?: Record<string, number>; __onSubmitted?: (id: string, mode: 'online'|'flush'|'offline') => void }).__submitCounts = { online: 0, flush: 0, offline: 0 } as any;
-      (window as unknown as { __submitCounts?: Record<string, number>; __onSubmitted?: (id: string, mode: 'online'|'flush'|'offline') => void }).__onSubmitted = (_id, mode) => {
-        const w = window as unknown as { __submitCounts: Record<string, number> };
-        w.__submitCounts[mode] = (w.__submitCounts[mode] ?? 0) + 1;
+      const w = window as unknown as { __submitCounts?: Record<string, number>; __onSubmitted?: (id: string, mode: 'online'|'flush'|'offline') => void };
+      w.__submitCounts = { online: 0, flush: 0, offline: 0 };
+      w.__onSubmitted = (_id, mode) => {
+        const s = (window as unknown as { __submitCounts: Record<string, number> }).__submitCounts;
+        s[mode] = (s[mode] ?? 0) + 1;
       };
     });
     await page.getByRole('button', { name: /submit inspection/i }).click();
