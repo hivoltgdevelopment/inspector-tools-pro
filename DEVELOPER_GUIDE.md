@@ -202,6 +202,21 @@ Pre-flight checks (faster CI parity):
 - `npm run check` — runs ESLint, TypeScript typecheck, and `playwright test --list` to catch syntax/import errors without running browsers.
   - Add this as a local pre-commit or pre-push hook if desired (e.g., via Husky).
 
+### Git hooks (Husky)
+
+We include a lightweight Husky setup to run `npm run check` on pre-commit.
+
+Setup (one-time after `npm i`):
+
+```bash
+npm run prepare
+```
+
+This creates `.husky/_` internals. The repo already contains `.husky/pre-commit` which runs `npm run check`.
+
+Notes:
+- Keep `check` fast (no full browser runs). For full E2E, run targeted specs locally.
+
 Helpers and patterns:
 
 - Navigation helpers (from `e2e/utils.ts`):

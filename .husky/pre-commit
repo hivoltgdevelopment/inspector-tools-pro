@@ -1,0 +1,3 @@
+#!/bin/sh
+# Run fast checks before commit. Keep this hook quick.
+npm run check
