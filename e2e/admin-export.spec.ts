@@ -1,5 +1,11 @@
 import { test, expect } from '@playwright/test';
 
+type DownloadInfo = { csv?: string; downloadName?: string };
+declare global {
+  // Augment window in page context for type-safety in evaluate/waitForFunction
+  interface Window { __downloadInfo?: DownloadInfo }
+}
+
 test.describe('Consent Admin Export (happy path)', () => {
   test('loads records and exports CSV via stubbed function', async ({ page }) => {
     // Intercept Supabase auth (defensive; app usually skips with VITE_SKIP_AUTH/VITE_SKIP_RBAC)
@@ -56,24 +62,23 @@ test.describe('Consent Admin Export (happy path)', () => {
 
     // Stub blob download to assert filename and content
     await page.addInitScript(() => {
-      // @ts-ignore
-      window.__downloadInfo = {};
+      const w = window as unknown as { __downloadInfo: DownloadInfo };
+      w.__downloadInfo = {};
       const origCreateObjectURL = URL.createObjectURL;
       URL.createObjectURL = (blob: Blob) => {
-        // @ts-ignore
-        blob.text().then((t) => (window.__downloadInfo.csv = t));
+        void blob.text().then((t) => {
+          (window as unknown as { __downloadInfo: DownloadInfo }).__downloadInfo.csv = t;
+        });
         return origCreateObjectURL(blob);
       };
       const origCreateElement = document.createElement.bind(document);
-      // @ts-ignore
-      document.createElement = ((tagName: string, ...rest: any[]) => {
-        const el = origCreateElement(tagName, ...rest) as HTMLElement;
+      document.createElement = ((tagName: string) => {
+        const el = origCreateElement(tagName) as HTMLElement;
         if (tagName.toLowerCase() === 'a') {
           const a = el as HTMLAnchorElement;
           const origClick = a.click.bind(a);
           a.click = () => {
-            // @ts-ignore
-            window.__downloadInfo.downloadName = a.download;
+            (window as unknown as { __downloadInfo: DownloadInfo }).__downloadInfo.downloadName = a.download;
             return origClick();
           };
         }
@@ -93,17 +98,15 @@ test.describe('Consent Admin Export (happy path)', () => {
 
     // Assert stubbed download details captured in page context
     await page.waitForFunction(() => {
-      // @ts-ignore
-      return !!(window.__downloadInfo && window.__downloadInfo.csv);
+      const w = window as unknown as { __downloadInfo?: DownloadInfo };
+      return !!w.__downloadInfo?.csv;
     });
 
-    const downloaded = await page.evaluate(() => {
-      // @ts-ignore
-      return window.__downloadInfo;
+    const downloaded = await page.evaluate<DownloadInfo>(() => {
+      return (window as unknown as { __downloadInfo: DownloadInfo }).__downloadInfo;
     });
 
     expect(downloaded.downloadName).toBe('consent-data.csv');
     expect(downloaded.csv).toBe(csv);
   });
 });
-
