@@ -50,6 +50,13 @@ E2E_BASE_URL=http://localhost:5173 npm run test:e2e
   - Uses a dev-only override to toggle payments visibility without a rebuild:
     - `?payments=true|false` or `localStorage.setItem('payments_enabled', 'true|false')`
 
+- `admin-export.spec.ts`
+  - Intercepts Supabase auth and `GET /rest/v1/sms_consent` to seed the admin table.
+  - Intercepts `GET /functions/v1/export-consent-data` and fulfills with a CSV string.
+  - Stubs the blob download by wrapping `URL.createObjectURL` and `<a>.click()` to assert
+    both the filename (`consent-data.csv`) and CSV content.
+  - Navigates to `/admin/consent?rbac=off` to bypass RBAC checks for the test run.
+
 ## Notes
 
 - For networked flows (e.g., Supabase Auth or Functions), prefer unit/integration tests or add Playwright route interception/mocking as needed.
