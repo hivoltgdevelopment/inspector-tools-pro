@@ -184,3 +184,41 @@ Access consent admin via Settings:
 - Maintain detailed records
 
 This system is designed to meet Twilio and TCPA compliance requirements. Any modifications should preserve these compliance features.
+
+---
+
+## End-to-end (E2E) tests quickstart
+
+We use Playwright for browser E2E tests. See `e2e/README.md` for full details.
+
+Common commands:
+
+- `npm run test:e2e` — run headless E2E (starts `npm run preview` automatically via config)
+- `npm run test:e2e:headed` — run headed
+- `npm run test:e2e:ui` — run Playwright UI mode
+
+Helpers and patterns:
+
+- Navigation helpers (from `e2e/utils.ts`):
+  - `gotoHome(page, { rbacOff?: boolean })`
+  - `gotoPortal(page, { payments?: boolean; client?: string; demo?: boolean; rbacOff?: boolean })`
+  - `gotoAdminConsent(page, { rbacOff?: boolean })`
+  - `gotoNotAuthorized(page)`, `gotoPaymentResult(page, 'success' | 'cancel')`
+
+- API stubs:
+  - Auth: `stubAuthUser(page, { id, email })`
+  - Reports: `stubReports(page, [...])`, `stubReportsFail(page)`
+  - Admin consent: `stubConsentList(...)`, `stubConsentPatchSuccess(...)`, `stubConsentPatchFail(...)`
+  - Export: `stubExportCsv(...)`, `stubExportFail(...)`
+  - Payments: `stubCreatePaymentSessionSuccess(...)`, `stubCreatePaymentSessionFail(...)`
+  - SMS: `stubSaveSmsConsentSuccess(...)`, `stubOtpSuccess(...)`
+  - Local storage: `setLocalStorage(page, key, value)`
+
+- CSV export capture:
+  - `addDownloadCapture(page)` + `waitForDownloadInfo(page)` → `{ csv, downloadName }`
+
+- Toast assertions:
+  - Use the global container: `page.getByTestId('toast-container').getByText('message')`
+
+- Optional test hook for offline submissions:
+  - In tests, define `window.__onSubmitted = (id, mode) => { ... }` to count `'online'|'flush'|'offline'` events
