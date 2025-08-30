@@ -5,6 +5,7 @@ test.describe('Inspection Form (offline submit)', () => {
   test('queues offline submission and clears media list', async ({ page, context }) => {
     // This route is gated by RequireRole. Run dev with VITE_SKIP_AUTH=true to bypass SMS login.
     await page.goto('/');
+    await expect(page.getByLabel('Property address')).toBeVisible();
 
     // Emulate offline
     await context.setOffline(true);
@@ -33,4 +34,3 @@ test.describe('Inspection Form (offline submit)', () => {
     await expect(page.getByText('offline.png')).toHaveCount(0);
   });
 });
-

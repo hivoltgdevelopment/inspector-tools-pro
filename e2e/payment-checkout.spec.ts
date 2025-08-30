@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Payment checkout (fake mode)', () => {
   test('navigates to success page when function returns url', async ({ page }) => {
-    // Use demo mode to show placeholder reports and force payments UI
     // Intercept the create-payment-session function to return a local success URL
     await page.route('**/functions/v1/create-payment-session', async (route) => {
       await route.fulfill({
@@ -12,7 +11,18 @@ test.describe('Payment checkout (fake mode)', () => {
       });
     });
 
-    await page.goto('/portal?payments=true&demo=1&client=test');
+    // Ensure at least one report renders regardless of auth/backend
+    await page.route('**/rest/v1/reports**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{ id: 'r1', title: 'Report A' }]),
+      });
+    });
+
+    // Use demo+payments; omit client param so demo mode can populate if needed
+    await page.goto('/portal?payments=true&demo=1');
+    await expect(page.getByText('Report A')).toBeVisible();
     await page.getByText('Pay invoice').first().click();
 
     await expect(page).toHaveURL(/\/payment\/success\?mock=1/);
