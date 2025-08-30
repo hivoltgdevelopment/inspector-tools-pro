@@ -123,6 +123,19 @@ export async function waitForDownloadInfo(page: Page): Promise<DownloadInfo> {
   });
 }
 
+export async function gotoPortal(
+  page: Page,
+  opts?: { payments?: boolean; client?: string; demo?: boolean; rbacOff?: boolean }
+) {
+  const params = new URLSearchParams();
+  if (opts?.rbacOff !== false) params.set('rbac', 'off');
+  if (typeof opts?.payments === 'boolean') params.set('payments', String(opts.payments));
+  if (opts?.client) params.set('client', opts.client);
+  if (opts?.demo) params.set('demo', opts.demo ? '1' : '0');
+  const query = params.toString();
+  await page.goto(`/portal${query ? `?${query}` : ''}`);
+}
+
 export async function stubSaveSmsConsentSuccess(page: Page) {
   await page.route('**/functions/v1/save-sms-consent', async (route) => {
     const req = route.request();

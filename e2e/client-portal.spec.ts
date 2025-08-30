@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { stubAuthUser, stubReports } from './utils';
+import { stubAuthUser, stubReports, gotoPortal } from './utils';
 
 test.describe('Client Portal (list + search)', () => {
   test('lists reports and filters by search', async ({ page }) => {
@@ -9,8 +9,7 @@ test.describe('Client Portal (list + search)', () => {
       { id: 'r2', title: 'Basement Report' },
     ]);
 
-    // Provide a client id via query param to bypass auth in dev
-    await page.goto('/portal?client=test');
+    await gotoPortal(page, { client: 'test' });
 
     await expect(page.getByTestId('portal-heading')).toBeVisible();
     await expect(page.getByTestId('report-item-r1')).toBeVisible();
