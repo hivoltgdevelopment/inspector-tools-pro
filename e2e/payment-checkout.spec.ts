@@ -23,7 +23,8 @@ test.describe('Payment checkout (fake mode)', () => {
     await gotoPortal(page, { payments: true, demo: true });
     await page.getByRole('heading', { name: 'My Reports' }).waitFor();
     await page.getByRole('button', { name: 'Pay invoice' }).first().click();
-    await expect(page.getByText('Failed to initiate checkout. Please try again later.')).toBeVisible();
+    await expect(page.getByTestId('toast-container')).toBeVisible();
+    await expect(page.getByTestId('toast-container').getByText('Failed to initiate checkout. Please try again later.')).toBeVisible();
   });
 
   test('hides pay button when payments disabled', async ({ page }) => {

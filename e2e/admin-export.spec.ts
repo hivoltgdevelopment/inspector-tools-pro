@@ -63,7 +63,8 @@ test.describe('Consent Admin negative and actions', () => {
     await gotoAdminConsent(page);
     await expect(page.getByRole('heading', { name: 'Consent Admin Dashboard' })).toBeVisible();
     await page.getByRole('button', { name: 'Export CSV' }).click();
-    await expect(page.getByText('Failed to export consent data')).toBeVisible();
+    await expect(page.getByTestId('toast-container')).toBeVisible();
+    await expect(page.getByTestId('toast-container').getByText('Failed to export consent data')).toBeVisible();
   });
 
   test('revokes consent and shows success toast', async ({ page }) => {
@@ -81,7 +82,8 @@ test.describe('Consent Admin negative and actions', () => {
     // Confirm revoke
     await page.getByRole('button', { name: 'Revoke' }).last().click();
     // Success toast and UI reflects revoked status
-    await expect(page.getByText('Consent revoked')).toBeVisible();
+    await expect(page.getByTestId('toast-container')).toBeVisible();
+    await expect(page.getByTestId('toast-container').getByText('Consent revoked')).toBeVisible();
     await expect(page.getByText('Revoked')).toBeVisible();
     // Revoke button should no longer be present for that row
     await expect(page.getByRole('button', { name: 'Revoke' })).toHaveCount(0);
@@ -97,7 +99,8 @@ test.describe('Consent Admin negative and actions', () => {
     await page.goto('/admin/consent?rbac=off');
     await page.getByTestId('revoke-e1').click();
     await page.getByRole('button', { name: 'Revoke' }).last().click();
-    await expect(page.getByText('Failed to revoke consent')).toBeVisible();
+    await expect(page.getByTestId('toast-container')).toBeVisible();
+    await expect(page.getByTestId('toast-container').getByText('Failed to revoke consent')).toBeVisible();
     await expect(page.getByTestId('status-e1')).toHaveText('Active');
   });
 });

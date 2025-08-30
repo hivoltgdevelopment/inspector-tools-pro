@@ -147,3 +147,26 @@ const info = await waitForDownloadInfo(page);
 expect(info.downloadName).toBe('consent-data.csv');
 expect(info.csv?.startsWith('id,')).toBeTruthy();
 ```
+
+### Test Hooks
+
+For some flows, the app exposes a no-op test hook you can opt into from E2E to count submits:
+
+```ts
+// In your test, before the action that triggers submission:
+await page.addInitScript(() => {
+  (window as unknown as { __submitCounts?: Record<string, number>; __onSubmitted?: (id: string, mode: 'online'|'flush'|'offline') => void }).__submitCounts = { online: 0, flush: 0, offline: 0 } as any;
+  (window as unknown as { __submitCounts?: Record<string, number>; __onSubmitted?: (id: string, mode: 'online'|'flush'|'offline') => void }).__onSubmitted = (_id, mode) => {
+    const w = window as unknown as { __submitCounts: Record<string, number> };
+    w.__submitCounts[mode] = (w.__submitCounts[mode] ?? 0) + 1;
+  };
+});
+
+// Later, assert on counts
+await page.waitForFunction(() => {
+  const w = window as unknown as { __submitCounts?: Record<string, number> };
+  return !!w.__submitCounts && w.__submitCounts.flush >= 2; // for multi-item flush
+});
+```
+
+The hook only fires if the test defines `window.__onSubmitted` and has no effect in production.

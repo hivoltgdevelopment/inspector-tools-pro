@@ -69,7 +69,9 @@ test.describe('Inspection Form (offline submit)', () => {
       window.dispatchEvent(new Event('online'));
     });
 
-    await expect(page.getByText('Back online. Syncing queued items…')).toBeVisible();
+    // Toast should be rendered in the global container
+    await expect(page.getByTestId('toast-container')).toBeVisible();
+    await expect(page.getByTestId('toast-container').getByText('Back online. Syncing queued items…')).toBeVisible();
     // Wait for two flush submissions
     await page.waitForFunction(() => {
       const w = window as unknown as { __submitCounts?: Record<string, number> };
