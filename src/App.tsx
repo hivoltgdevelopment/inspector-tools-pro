@@ -14,7 +14,18 @@ const OfflinePage = React.lazy(() => import('./components/OfflinePage'));
 
 export default function App() {
   const [authed, setAuthed] = useState(false);
-  const skipAuth = import.meta.env.VITE_SKIP_AUTH === 'true';
+  const skipAuthEnv = import.meta.env.VITE_SKIP_AUTH === 'true';
+  // Allow bypass in any environment for testing: query param or localStorage
+  let skipAuth = skipAuthEnv;
+  try {
+    const url = new URL(window.location.href);
+    const qp = url.searchParams.get('auth');
+    if (qp === 'off') skipAuth = true;
+    const ls = localStorage.getItem('auth_off');
+    if (ls === 'true') skipAuth = true;
+  } catch (_e) {
+    // ignore non-browser contexts
+  }
 
   useEffect(() => {
     const init = async () => {

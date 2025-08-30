@@ -125,10 +125,11 @@ export async function waitForDownloadInfo(page: Page): Promise<DownloadInfo> {
 
 export async function gotoPortal(
   page: Page,
-  opts?: { payments?: boolean; client?: string; demo?: boolean; rbacOff?: boolean }
+  opts?: { payments?: boolean; client?: string; demo?: boolean; rbacOff?: boolean; authOff?: boolean }
 ) {
   const params = new URLSearchParams();
   if (opts?.rbacOff !== false) params.set('rbac', 'off');
+  if (opts?.authOff !== false) params.set('auth', 'off');
   if (typeof opts?.payments === 'boolean') params.set('payments', String(opts.payments));
   if (opts?.client) params.set('client', opts.client);
   if (opts?.demo) params.set('demo', opts.demo ? '1' : '0');
