@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { gotoHome } from './utils';
 import path from 'path';
-import path from 'path';
 
 test.describe('Inspection Form (offline submit)', () => {
   test('queues offline submission and clears media list', async ({ page, context }) => {
