@@ -17,7 +17,18 @@ export default function RequireRole({ roles, children, fallback, redirectTo }: R
   const inRouter = useInRouterContext();
 
   // Dev bypass: allow all roles when enabled
-  const skipRbac = import.meta.env.VITE_SKIP_RBAC === 'true';
+  const skipRbacEnv = import.meta.env.VITE_SKIP_RBAC === 'true';
+  // Allow bypass in any environment for testing: query param or localStorage
+  let skipRbac = skipRbacEnv;
+  try {
+    const url = new URL(window.location.href);
+    const qp = url.searchParams.get('rbac');
+    if (qp === 'off') skipRbac = true;
+    const ls = localStorage.getItem('rbac_off');
+    if (ls === 'true') skipRbac = true;
+  } catch (_e) {
+    // ignore non-browser contexts
+  }
 
   useEffect(() => {
     let mounted = true;

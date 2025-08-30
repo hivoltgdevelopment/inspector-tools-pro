@@ -20,7 +20,10 @@ test.describe('Payment checkout (fake mode)', () => {
       });
     });
 
-    // Use demo+payments; omit client param so demo mode can populate if needed
+    // Ensure payments are enabled at first render and use demo reports
+    await page.addInitScript(() => {
+      localStorage.setItem('payments_enabled', 'true');
+    });
     await page.goto('/portal?payments=true&demo=1');
     await page.getByText('Report A').waitFor({ state: 'visible', timeout: 20000 });
     await page.getByText('Pay invoice').first().click();
