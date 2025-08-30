@@ -93,6 +93,17 @@ npm run build:gh-pages  # GitHub Pages build with relative paths
 - Vite manualChunks groups common UI libs (Radix) and vendor code to improve caching.
 - Images are compressed client‑side before upload (defaults ~1600px, ~80% JPEG quality; form uses 1280px/72% by default).
 
+Bundle analysis (local)
+- Generate an interactive treemap report of the production bundle:
+  ```bash
+  npm run analyze
+  # open ./dist/bundle-report.html in your browser
+  ```
+  Notes:
+  - This uses `rollup-plugin-visualizer` if present. If you don’t have it installed yet, run:
+    `npm i -D rollup-plugin-visualizer`
+  - CI builds are unaffected; the report only generates when `ANALYZE=true`.
+
 ## Contributing
 
 - Prereqs: Node.js 20+ and npm 9+

@@ -13,6 +13,15 @@ try {
   hasSentry = false;
 }
 
+// Optional bundle visualizer (local analysis only)
+let visualizer: undefined | ((opts?: any) => any);
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  visualizer = require('rollup-plugin-visualizer').visualizer;
+} catch (_) {
+  visualizer = undefined;
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   // Default to root base for standard builds and preview; override via CLI for GH Pages
@@ -131,6 +140,20 @@ export default defineConfig(({ mode }) => ({
           utils: ['date-fns', 'clsx', 'tailwind-merge'],
         },
       },
+      plugins: [
+        // Generate bundle report when ANALYZE=true
+        ...(process.env.ANALYZE === 'true' && visualizer
+          ? [
+              visualizer({
+                filename: 'dist/bundle-report.html',
+                template: 'treemap',
+                gzipSize: true,
+                brotliSize: true,
+                open: false,
+              }),
+            ]
+          : []),
+      ],
     },
     sourcemap: false,
     minify: 'esbuild',
