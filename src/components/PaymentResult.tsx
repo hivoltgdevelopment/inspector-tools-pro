@@ -8,8 +8,8 @@ type Props = {
 export default function PaymentResult({ kind }: Props) {
   const isSuccess = kind === 'success';
   return (
-    <div className="max-w-md mx-auto mt-16 p-6 bg-white rounded shadow text-center space-y-4">
-      <h1 className="text-2xl font-bold">
+    <div className="max-w-md mx-auto mt-16 p-6 bg-white rounded shadow text-center space-y-4" data-testid="payment-container">
+      <h1 className="text-2xl font-bold" data-testid="payment-heading">
         {isSuccess ? 'Payment Successful' : 'Payment Canceled'}
       </h1>
       <p className="text-gray-700">

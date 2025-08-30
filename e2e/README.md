@@ -60,6 +60,11 @@ E2E_BASE_URL=http://localhost:5173 npm run test:e2e
     - Export failure (500) shows a toast error.
     - Revoke flow confirms, calls PATCH on `sms_consent`, and shows a success toast with UI update.
 
+- `routes-basic.spec.ts`
+  - Covers static routes:
+    - `/not-authorized` (renders heading and actions)
+    - `/payment/success` and `/payment/cancel` (verify headings)
+
 ## Notes
 
 - For networked flows (e.g., Supabase Auth or Functions), prefer unit/integration tests or add Playwright route interception/mocking as needed.
