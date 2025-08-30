@@ -1,11 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { stubReports, stubReportsFail, setLocalStorage } from './utils';
 
 test.describe('Client Portal extended flows', () => {
   test('shows error when reports fetch fails', async ({ page }) => {
-    // Ensure fetch path triggers via client query param
-    await page.route('**/rest/v1/reports**', async (route) => {
-      await route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'fail' }) });
-    });
+    await stubReportsFail(page);
     await page.goto('/portal?client=test');
     await expect(page.getByTestId('portal-error')).toBeVisible();
   });
@@ -20,17 +18,10 @@ test.describe('Client Portal extended flows', () => {
   });
 
   test('lists reports via REST and filters (success path)', async ({ page }) => {
-    // Intercept with 2 reports
-    await page.route('**/rest/v1/reports**', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify([
-          { id: 'r1', title: 'Roof Report' },
-          { id: 'r2', title: 'Basement Report' },
-        ]),
-      });
-    });
+    await stubReports(page, [
+      { id: 'r1', title: 'Roof Report' },
+      { id: 'r2', title: 'Basement Report' },
+    ]);
     await page.goto('/portal?client=test');
     await expect(page.getByTestId('portal-heading')).toBeVisible();
     await expect(page.getByTestId('report-item-r1')).toBeVisible();
@@ -42,9 +33,7 @@ test.describe('Client Portal extended flows', () => {
   });
 
   test('empty REST response shows empty state', async ({ page }) => {
-    await page.route('**/rest/v1/reports**', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
-    });
+    await stubReports(page, []);
     await page.goto('/portal?client=test');
     await expect(page.getByTestId('portal-heading')).toBeVisible();
     await expect(page.locator('[data-testid="portal-list"] li')).toHaveCount(0);

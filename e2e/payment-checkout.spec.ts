@@ -1,29 +1,13 @@
 import { test, expect } from '@playwright/test';
+import { stubReports, stubCreatePaymentSessionSuccess, stubCreatePaymentSessionFail, setLocalStorage } from './utils';
 
 test.describe('Payment checkout (fake mode)', () => {
   test('navigates to success page when function returns url', async ({ page }) => {
-    // Intercept the create-payment-session function to return a local success URL
-    await page.route('**/functions/v1/create-payment-session', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ url: '/payment/success?mock=1' }),
-      });
-    });
-
-    // Ensure at least one report renders regardless of auth/backend
-    await page.route('**/rest/v1/reports**', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify([{ id: 'r1', title: 'Report A' }]),
-      });
-    });
+    await stubCreatePaymentSessionSuccess(page, '/payment/success?mock=1');
+    await stubReports(page, [{ id: 'r1', title: 'Report A' }]);
 
     // Ensure payments are enabled at first render and use demo reports
-    await page.addInitScript(() => {
-      localStorage.setItem('payments_enabled', 'true');
-    });
+    await setLocalStorage(page, 'payments_enabled', 'true');
     await page.goto('/portal?payments=true&demo=1');
     await page.getByRole('heading', { name: 'My Reports' }).waitFor();
     await page.getByRole('button', { name: 'Pay invoice' }).first().click();
@@ -33,15 +17,9 @@ test.describe('Payment checkout (fake mode)', () => {
   });
 
   test('shows toast error when session creation fails', async ({ page }) => {
-    await page.route('**/functions/v1/create-payment-session', async (route) => {
-      await route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'fail' }) });
-    });
-    await page.route('**/rest/v1/reports**', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 'r1', title: 'Report A' }]) });
-    });
-    await page.addInitScript(() => {
-      localStorage.setItem('payments_enabled', 'true');
-    });
+    await stubCreatePaymentSessionFail(page);
+    await stubReports(page, [{ id: 'r1', title: 'Report A' }]);
+    await setLocalStorage(page, 'payments_enabled', 'true');
     await page.goto('/portal?payments=true&demo=1');
     await page.getByRole('heading', { name: 'My Reports' }).waitFor();
     await page.getByRole('button', { name: 'Pay invoice' }).first().click();
@@ -49,32 +27,20 @@ test.describe('Payment checkout (fake mode)', () => {
   });
 
   test('hides pay button when payments disabled', async ({ page }) => {
-    await page.route('**/rest/v1/reports**', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 'r1', title: 'Report A' }]) });
-    });
+    await stubReports(page, [{ id: 'r1', title: 'Report A' }]);
     // Explicitly disable
-    await page.addInitScript(() => {
-      localStorage.setItem('payments_enabled', 'false');
-    });
+    await setLocalStorage(page, 'payments_enabled', 'false');
     await page.goto('/portal?payments=false&demo=1');
     await page.getByRole('heading', { name: 'My Reports' }).waitFor();
     await expect(page.getByTestId('pay-button')).toHaveCount(0);
   });
 
   test('shows pay button per report when payments enabled', async ({ page }) => {
-    await page.route('**/rest/v1/reports**', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify([
-          { id: 'r1', title: 'Roof Report' },
-          { id: 'r2', title: 'Basement Report' },
-        ]),
-      });
-    });
-    await page.addInitScript(() => {
-      localStorage.setItem('payments_enabled', 'true');
-    });
+    await stubReports(page, [
+      { id: 'r1', title: 'Roof Report' },
+      { id: 'r2', title: 'Basement Report' },
+    ]);
+    await setLocalStorage(page, 'payments_enabled', 'true');
     await page.goto('/portal?payments=true');
     await page.getByTestId('portal-heading').waitFor();
     // Each report item has its own pay-button
