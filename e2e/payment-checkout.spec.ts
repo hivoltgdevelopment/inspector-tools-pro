@@ -25,8 +25,8 @@ test.describe('Payment checkout (fake mode)', () => {
       localStorage.setItem('payments_enabled', 'true');
     });
     await page.goto('/portal?payments=true&demo=1');
-    await page.getByText('Report A').waitFor({ state: 'visible', timeout: 20000 });
-    await page.getByText('Pay invoice').first().click();
+    await page.getByRole('heading', { name: 'My Reports' }).waitFor();
+    await page.getByRole('button', { name: 'Pay invoice' }).first().click();
 
     await expect(page).toHaveURL(/\/payment\/success\?mock=1/);
     await expect(page.getByText(/success/i)).toBeVisible();
