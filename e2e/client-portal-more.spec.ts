@@ -41,6 +41,16 @@ test.describe('Client Portal extended flows', () => {
     await expect(page.getByTestId('report-item-r2')).toBeVisible();
   });
 
+  test('empty REST response shows empty state', async ({ page }) => {
+    await page.route('**/rest/v1/reports**', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    });
+    await page.goto('/portal?client=test');
+    await expect(page.getByTestId('portal-heading')).toBeVisible();
+    await expect(page.locator('[data-testid="portal-list"] li')).toHaveCount(0);
+    await expect(page.getByTestId('portal-empty')).toBeVisible();
+  });
+
   test('query param overrides localStorage (true wins over false)', async ({ page }) => {
     await page.route('**/rest/v1/reports**', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 'r1', title: 'A' }]) });
