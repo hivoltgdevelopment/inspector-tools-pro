@@ -69,3 +69,81 @@ E2E_BASE_URL=http://localhost:5173 npm run test:e2e
 
 - For networked flows (e.g., Supabase Auth or Functions), prefer unit/integration tests or add Playwright route interception/mocking as needed.
 - These specs intentionally avoid network dependencies to stay fast and deterministic.
+
+## Utilities
+
+Shared helpers in `e2e/utils.ts` reduce duplication:
+
+- Navigation
+  - `gotoHome(page, { rbacOff?: boolean })`
+  - `gotoPortal(page, { payments?: boolean; client?: string; demo?: boolean; rbacOff?: boolean })`
+  - `gotoAdminConsent(page, { rbacOff?: boolean })`
+  - `gotoNotAuthorized(page)`
+  - `gotoPaymentResult(page, kind: 'success' | 'cancel')`
+
+- API stubs
+  - `stubAuthUser(page, user)`
+  - `stubReports(page, reports)`, `stubReportsFail(page, status)`
+  - `stubConsentList(page, records)`, `stubConsentPatchSuccess(page, updated)`, `stubConsentPatchFail(page, status)`
+  - `stubExportCsv(page, csv)`, `stubExportFail(page, status)`
+  - `stubCreatePaymentSessionSuccess(page, url)`, `stubCreatePaymentSessionFail(page, status)`
+  - `stubSaveSmsConsentSuccess(page)`, `stubOtpSuccess(page)`
+  - `setLocalStorage(page, key, value)`
+
+- CSV download capture (for export tests)
+  - `addDownloadCapture(page)`: wraps blob URL + anchor click
+  - `waitForDownloadInfo(page)`: returns `{ csv?: string; downloadName?: string }`
+
+### Examples
+
+Navigation
+
+```ts
+import { gotoHome, gotoPortal, gotoAdminConsent, gotoNotAuthorized, gotoPaymentResult } from './utils';
+
+await gotoHome(page, { rbacOff: true });
+await gotoPortal(page, { payments: true, client: 'test', demo: true });
+await gotoAdminConsent(page); // defaults rbac=off
+await gotoNotAuthorized(page);
+await gotoPaymentResult(page, 'success');
+```
+
+Stubbing APIs
+
+```ts
+import {
+  stubAuthUser,
+  stubReports, stubReportsFail,
+  stubConsentList, stubConsentPatchSuccess, stubConsentPatchFail,
+  stubExportCsv, stubExportFail,
+  stubCreatePaymentSessionSuccess, stubCreatePaymentSessionFail,
+  stubSaveSmsConsentSuccess, stubOtpSuccess,
+  setLocalStorage,
+} from './utils';
+
+await stubAuthUser(page, { id: 'u1', email: 'user@example.com' });
+await stubReports(page, [{ id: 'r1', title: 'Roof' }]);
+await stubReportsFail(page, 500);
+await stubConsentList(page, [{ id: 'c1', full_name: 'Alice', phone_number: '+1555', consent_given: true }]);
+await stubConsentPatchSuccess(page, [{ id: 'c1', consent_given: false }]);
+await stubConsentPatchFail(page, 500);
+await stubExportCsv(page, 'id,name\n1,Alice');
+await stubExportFail(page);
+await stubCreatePaymentSessionSuccess(page, '/payment/success');
+await stubCreatePaymentSessionFail(page);
+await stubSaveSmsConsentSuccess(page);
+await stubOtpSuccess(page);
+await setLocalStorage(page, 'payments_enabled', 'true');
+```
+
+CSV download capture
+
+```ts
+import { addDownloadCapture, waitForDownloadInfo } from './utils';
+
+await addDownloadCapture(page);
+// trigger export → link click in app
+const info = await waitForDownloadInfo(page);
+expect(info.downloadName).toBe('consent-data.csv');
+expect(info.csv?.startsWith('id,')).toBeTruthy();
+```
