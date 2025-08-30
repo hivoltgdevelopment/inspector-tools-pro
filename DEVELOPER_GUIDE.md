@@ -197,6 +197,11 @@ Common commands:
 - `npm run test:e2e:headed` — run headed
 - `npm run test:e2e:ui` — run Playwright UI mode
 
+Pre-flight checks (faster CI parity):
+
+- `npm run check` — runs ESLint, TypeScript typecheck, and `playwright test --list` to catch syntax/import errors without running browsers.
+  - Add this as a local pre-commit or pre-push hook if desired (e.g., via Husky).
+
 Helpers and patterns:
 
 - Navigation helpers (from `e2e/utils.ts`):

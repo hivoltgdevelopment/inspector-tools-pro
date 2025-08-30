@@ -9,6 +9,8 @@
     "build:dev": "vite build --mode development",
     "build:gh-pages": "vite build --base=/inspector-tools/",
     "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "check": "npm run lint --silent && npm run typecheck --silent && npx playwright test --list",
     "test": "vitest",
     "preview": "vite preview",
     "deploy": "npx gh-pages -d dist",

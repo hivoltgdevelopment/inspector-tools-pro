@@ -26,6 +26,8 @@ try {
           { allowConstantExport: true },
         ],
         "@typescript-eslint/no-unused-vars": "off",
+        // Catch duplicate imports (e.g., when patching tests)
+        "no-duplicate-imports": "error",
         // Avoid multiple Toasters (sonner). Use the global Toaster in src/App.tsx only.
         "no-restricted-imports": [
           "error",
