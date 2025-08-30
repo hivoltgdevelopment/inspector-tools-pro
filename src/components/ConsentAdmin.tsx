@@ -108,9 +108,9 @@ export default function ConsentAdmin() {
   }
 
   return (
-    <div className="border rounded p-4">
+    <div className="border rounded p-4" data-testid="consent-admin">
       <Toaster position="top-right" />
-      <h2 className="font-bold mb-4">Consent Admin Dashboard</h2>
+      <h2 className="font-bold mb-4" data-testid="consent-heading">Consent Admin Dashboard</h2>
       <div className="flex items-center gap-2 mb-4">
         <input
           type="text"
@@ -118,11 +118,13 @@ export default function ConsentAdmin() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="border rounded px-2 py-1 flex-1"
+          data-testid="search-input"
         />
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value as 'all' | 'active' | 'revoked')}
           className="border rounded px-2 py-1"
+          data-testid="status-filter"
         >
           <option value="all">All</option>
           <option value="active">Active</option>
@@ -131,6 +133,7 @@ export default function ConsentAdmin() {
         <button
           onClick={exportData}
           className="border rounded px-3 py-1 bg-blue-500 text-white"
+          data-testid="export-btn"
         >
           Export CSV
         </button>
@@ -149,13 +152,14 @@ export default function ConsentAdmin() {
             <tr key={r.id} className="border-b last:border-b-0">
               <td className="py-2">{r.full_name}</td>
               <td className="py-2">{r.phone_number}</td>
-              <td className="py-2">
+              <td className="py-2" data-testid={`status-${r.id}`}>
                 {r.consent_given ? 'Active' : 'Revoked'}
               </td>
               <td className="py-2 flex gap-2">
                 <button
                   onClick={() => viewRecord(r)}
                   className="text-blue-600 underline"
+                  data-testid={`view-${r.id}`}
                 >
                   View
                 </button>
@@ -163,6 +167,7 @@ export default function ConsentAdmin() {
                   <button
                     onClick={() => revoke(r)}
                     className="text-red-600 underline"
+                    data-testid={`revoke-${r.id}`}
                   >
                     Revoke
                   </button>

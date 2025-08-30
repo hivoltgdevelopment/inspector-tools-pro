@@ -181,4 +181,34 @@ test.describe('Consent Admin negative and actions', () => {
     // Revoke button should no longer be present for that row
     await expect(page.getByRole('button', { name: 'Revoke' })).toHaveCount(0);
   });
+
+  test('revoke shows error toast when PATCH fails', async ({ page }) => {
+    await page.route('**/rest/v1/sms_consent**', async (route) => {
+      const method = route.request().method();
+      if (method === 'GET') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([
+            { id: 'e1', created_at: '2025-01-01T00:00:00Z', full_name: 'Error Case', phone_number: '+15551111', consent_given: true },
+          ]),
+        });
+        return;
+      }
+      if (method === 'PATCH') {
+        await route.fulfill({ status: 500, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ error: 'fail' }) });
+        return;
+      }
+      await route.continue();
+    });
+    await page.route('**/auth/v1/user**', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'admin-user' }) });
+    });
+
+    await page.goto('/admin/consent?rbac=off');
+    await page.getByTestId('revoke-e1').click();
+    await page.getByRole('button', { name: 'Revoke' }).last().click();
+    await expect(page.getByText('Failed to revoke consent')).toBeVisible();
+    await expect(page.getByTestId('status-e1')).toHaveText('Active');
+  });
 });
