@@ -18,8 +18,8 @@
 - [x] Scaffold Playwright + scripts
 - [x] SMSAuth validation (consent + phone format)
 - [x] InspectionForm offline submission clears media
-- [ ] SMSConsent happy path (intercept `POST /functions/v1/save-sms-consent` ⇒ 200)
-- [ ] Client Portal list + search (intercept Supabase REST for `reports`)
+ - [x] SMSConsent happy path (intercept `POST /functions/v1/save-sms-consent` ⇒ 200)
+ - [x] Client Portal list + search (intercept Supabase REST for `reports`)
 
 2) Offline Queue Persistence
 - [ ] Replace in‑memory upload queue with `idb-keyval`
