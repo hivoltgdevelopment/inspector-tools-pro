@@ -39,4 +39,26 @@ test.describe('Client Portal extended flows', () => {
     await expect(page.getByTestId('report-item-r1')).toHaveCount(0);
     await expect(page.getByTestId('report-item-r2')).toBeVisible();
   });
+
+  test('query param overrides localStorage (true wins over false)', async ({ page }) => {
+    await page.route('**/rest/v1/reports**', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 'r1', title: 'A' }]) });
+    });
+    await page.addInitScript(() => {
+      localStorage.setItem('payments_enabled', 'false');
+    });
+    await page.goto('/portal?payments=true&client=test');
+    await expect(page.getByTestId('report-item-r1').getByTestId('pay-button')).toBeVisible();
+  });
+
+  test('query param overrides localStorage (false wins over true)', async ({ page }) => {
+    await page.route('**/rest/v1/reports**', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 'r1', title: 'A' }]) });
+    });
+    await page.addInitScript(() => {
+      localStorage.setItem('payments_enabled', 'true');
+    });
+    await page.goto('/portal?payments=false&client=test');
+    await expect(page.getByTestId('pay-button')).toHaveCount(0);
+  });
 });

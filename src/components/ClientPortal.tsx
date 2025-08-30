@@ -22,11 +22,16 @@ export default function ClientPortal() {
   try {
     const url = new URL(window.location.href);
     const qp = url.searchParams.get('payments');
-    if (qp === 'true') paymentsEnabled = true;
-    if (qp === 'false') paymentsEnabled = false;
-    const ls = localStorage.getItem('payments_enabled');
-    if (ls === 'true') paymentsEnabled = true;
-    if (ls === 'false') paymentsEnabled = false;
+    if (qp === 'true') {
+      paymentsEnabled = true; // query param wins
+    } else if (qp === 'false') {
+      paymentsEnabled = false; // query param wins
+    } else {
+      // Only apply localStorage if no explicit query override
+      const ls = localStorage.getItem('payments_enabled');
+      if (ls === 'true') paymentsEnabled = true;
+      if (ls === 'false') paymentsEnabled = false;
+    }
   } catch (_e) {
     // Ignore invalid URL in non-browser environments
   }
