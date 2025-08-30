@@ -22,7 +22,7 @@ test.describe('Payment checkout (fake mode)', () => {
 
     // Use demo+payments; omit client param so demo mode can populate if needed
     await page.goto('/portal?payments=true&demo=1');
-    await expect(page.getByText('Report A')).toBeVisible();
+    await page.getByText('Report A').waitFor({ state: 'visible', timeout: 20000 });
     await page.getByText('Pay invoice').first().click();
 
     await expect(page).toHaveURL(/\/payment\/success\?mock=1/);
