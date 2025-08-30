@@ -49,6 +49,7 @@ export default function PayInvoiceButton({ reportId }: Props) {
       onClick={handlePay}
       disabled={loading}
       className="mt-2 inline-block rounded bg-blue-600 px-3 py-1 text-white disabled:opacity-60"
+      data-testid="pay-button"
     >
       {loading ? 'Processing…' : 'Pay invoice'}
     </button>

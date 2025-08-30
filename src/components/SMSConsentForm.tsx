@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { isValidPhone } from '@/lib/phone';
+import { normalizeToE164, toE164 } from '@/lib/phone';
 import { toast } from 'sonner';
 
 export default function SMSConsentForm() {
@@ -21,11 +21,14 @@ export default function SMSConsentForm() {
       return;
     }
 
-    if (!isValidPhone(phone)) {
-      const msg = 'Please enter a valid phone number in E.164 format.';
-      setError(msg);
-      toast.error(msg);
-      return;
+    {
+      const e164 = normalizeToE164(phone, '+1') || toE164(phone);
+      if (!e164) {
+        const msg = 'Please enter a valid phone number.';
+        setError(msg);
+        toast.error(msg);
+        return;
+      }
     }
 
     setLoading(true);
@@ -55,12 +58,22 @@ export default function SMSConsentForm() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         },
-        body: JSON.stringify({ name, phone, consent: true }),
+        body: JSON.stringify({ name, phone: normalizeToE164(phone, '+1') || toE164(phone) || phone, consent: true }),
       });
       if (!res.ok) {
-        throw new Error('Failed to save consent.');
+        let details = '';
+        try {
+          const data = await res.json();
+          details = (data && (data.error || data.message)) || '';
+        } catch (_err) {
+          if (import.meta.env.DEV) {
+            console.debug('[SMSConsentForm] non-JSON error response');
+          }
+        }
+        throw new Error(details ? `Failed to save consent. ${details}` : 'Failed to save consent.');
       }
       setSuccess('Consent recorded successfully.');
       toast.success('Consent recorded successfully.');
@@ -100,11 +113,15 @@ export default function SMSConsentForm() {
           type="tel"
           placeholder="Phone number"
           aria-label="Phone number"
+          aria-describedby="consent-phone-hint"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           className="w-full border rounded p-2"
           required
         />
+        <p id="consent-phone-hint" className="text-xs text-gray-500">
+          Example: +1 555 123 4567
+        </p>
         <label className="flex items-center space-x-2 text-sm">
           <input
             type="checkbox"

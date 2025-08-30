@@ -1,8 +1,6 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { Toaster } from 'sonner';
+// Silence the toast UI by mocking the sonner module below
 
 vi.mock('idb-keyval', () => {
   const store = new Map<string, any>();
@@ -22,15 +20,27 @@ vi.mock('idb-keyval', () => {
   };
 });
 
+// Silence toast UI completely in tests
+vi.mock('sonner', () => {
+  const noop = () => {};
+  const toast = Object.assign(noop, {
+    success: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    message: vi.fn(),
+  });
+  return { Toaster: () => null, toast };
+});
+
 import * as idbKeyval from 'idb-keyval';
 
-// Preserve any existing implementations so we can restore them after tests
+// Preserve originals for restoration after tests
 const originalCreateObjectURL = URL.createObjectURL;
 const originalRevokeObjectURL = URL.revokeObjectURL;
 const originalAlert = window.alert;
 const originalSpeechRecognition = (window as any).SpeechRecognition;
 const originalWebkitSpeechRecognition = (window as any).webkitSpeechRecognition;
-let toasterRoot: ReturnType<typeof createRoot> | null = null;
 
 beforeEach(() => {
   (idbKeyval as any)._store.clear();
@@ -84,6 +94,28 @@ beforeAll(() => {
       writable: true,
     });
   }
+
+  // Provide minimal crypto.randomUUID for environments lacking it
+  const g: any = globalThis as any;
+  if (!g.crypto || typeof g.crypto.randomUUID !== 'function') {
+    const randomUUID = () =>
+      'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    const getRandomValues = (arr: Uint8Array) => {
+      for (let i = 0; i < arr.length; i++) arr[i] = (Math.random() * 256) | 0;
+      return arr;
+    };
+    Object.defineProperty(g, 'crypto', {
+      value: { randomUUID, getRandomValues },
+      configurable: true,
+      writable: true,
+    });
+  }
+
+  // Toaster rendering is disabled by the mock above
 });
 
 afterAll(() => {
@@ -115,18 +147,6 @@ afterAll(() => {
     value: originalWebkitSpeechRecognition,
     configurable: true,
   });
-  if (toasterRoot) {
-    toasterRoot.unmount();
-    toasterRoot = null;
-  }
-});
 
-// Mount a global Toaster so toast() calls render during tests
-beforeAll(() => {
-  const host = document.createElement('div');
-  document.body.appendChild(host);
-  toasterRoot = createRoot(host);
-  toasterRoot.render(
-    React.createElement(React.StrictMode, null, React.createElement(Toaster, { position: 'top-right' }))
-  );
+  // No toaster to unmount because we mock sonner
 });

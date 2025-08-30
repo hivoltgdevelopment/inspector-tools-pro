@@ -26,6 +26,19 @@ try {
           { allowConstantExport: true },
         ],
         "@typescript-eslint/no-unused-vars": "off",
+        // Avoid multiple Toasters (sonner). Use the global Toaster in src/App.tsx only.
+        "no-restricted-imports": [
+          "error",
+          {
+            paths: [
+              {
+                name: "sonner",
+                importNames: ["Toaster"],
+                message: "Use the global <Toaster> in src/App.tsx. Do not import Toaster in other files.",
+              },
+            ],
+          },
+        ],
       },
     }
   );
@@ -42,6 +55,13 @@ try {
       },
     }
   );
+  // Allow Toaster usage only in App shell
+  config.push({
+    files: ["src/App.tsx"],
+    rules: {
+      "no-restricted-imports": "off",
+    },
+  });
 } catch {
   config = [
     {

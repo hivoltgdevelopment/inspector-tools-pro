@@ -2,10 +2,31 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react-swc";
 import { VitePWA } from 'vite-plugin-pwa';
 import path from "path";
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+let hasSentry = false;
+try {
+  require.resolve('@sentry/browser');
+  hasSentry = true;
+} catch (_) {
+  hasSentry = false;
+}
+
+// Optional bundle visualizer (local analysis only)
+type VisualizerFn = (opts?: Record<string, unknown>) => unknown;
+let visualizer: VisualizerFn | undefined;
+try {
+  const mod: { visualizer: VisualizerFn } = require('rollup-plugin-visualizer');
+  visualizer = mod.visualizer;
+} catch (_) {
+  visualizer = undefined;
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: './', // Use relative paths for GitHub Pages
+  // Default to root base for standard builds and preview; override via CLI for GH Pages
+  base: '/',
   server: {
     host: "::",
     port: 8080,
@@ -62,8 +83,9 @@ export default defineConfig(({ mode }) => ({
           }
         ]
       },
+      injectRegister: 'auto',
       devOptions: {
-        enabled: mode === 'development',
+        enabled: false, // disable SW in dev to avoid noisy fetch errors
         type: 'module'
       },
       manifest: {
@@ -82,15 +104,15 @@ export default defineConfig(({ mode }) => ({
         prefer_related_applications: false,
         icons: [
           {
-            src: 'icon-192.png',
+            src: 'placeholder.svg',
             sizes: '192x192',
-            type: 'image/png',
+            type: 'image/svg+xml',
             purpose: 'any maskable'
           },
           {
-            src: 'icon-512.png',
+            src: 'placeholder.svg',
             sizes: '512x512',
-            type: 'image/png',
+            type: 'image/svg+xml',
             purpose: 'any maskable'
           }
         ]
@@ -100,17 +122,39 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      ...(hasSentry ? {} : { '@sentry/browser': path.resolve(__dirname, './src/lib/sentry-empty.ts') }),
     },
   },
   build: {
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-alert-dialog',
+            '@radix-ui/react-toast',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-select',
+          ],
           utils: ['date-fns', 'clsx', 'tailwind-merge'],
         },
       },
+      plugins: [
+        // Generate bundle report when ANALYZE=true
+        ...(process.env.ANALYZE === 'true' && visualizer
+          ? [
+              visualizer({
+                filename: 'dist/bundle-report.html',
+                template: 'treemap',
+                gzipSize: true,
+                brotliSize: true,
+                open: false,
+              }),
+            ]
+          : []),
+      ],
     },
     sourcemap: false,
     minify: 'esbuild',

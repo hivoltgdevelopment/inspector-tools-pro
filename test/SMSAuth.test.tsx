@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import SMSAuth from '@/components/SMSAuth';
@@ -53,7 +53,9 @@ describe('SMSAuth', () => {
       await user.click(screen.getByRole('button', { name: /send code/i }));
     });
 
-    await screen.findByText('You must consent to receive SMS messages.');
+    expect(
+      await screen.findByRole('alert')
+    ).toHaveTextContent('You must consent to receive SMS messages.');
   });
 
   it('shows error when sign in fails', async () => {
@@ -69,6 +71,8 @@ describe('SMSAuth', () => {
       await user.click(screen.getByRole('button', { name: /send code/i }));
     });
 
-    await screen.findByText(/failed to send verification code\. ?please try again/i);
+    expect(
+      await screen.findByRole('alert')
+    ).toHaveTextContent(/failed to send verification code\. ?please try again/i);
   });
 });

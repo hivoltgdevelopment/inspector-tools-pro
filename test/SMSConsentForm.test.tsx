@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import SMSConsentForm from '@/components/SMSConsentForm';
@@ -36,7 +36,9 @@ describe('SMSConsentForm', () => {
       await user.click(screen.getByRole('button', { name: /submit/i }));
     });
 
-    await screen.findByText('You must explicitly consent to receive SMS messages.');
+    expect(
+      await screen.findByRole('alert')
+    ).toHaveTextContent('You must explicitly consent to receive SMS messages.');
   });
 
   it('shows error when request fails', async () => {
@@ -55,10 +57,10 @@ describe('SMSConsentForm', () => {
       await user.click(screen.getByRole('button', { name: /submit/i }));
     });
 
-    // Component should surface the canonical error message
-    expect(await screen.findByText('Failed to save consent.')).toHaveTextContent(
-      'Failed to save consent.'
-    );
+    // Assert inline error message inside the form container
+    expect(
+      await screen.findByRole('alert')
+    ).toHaveTextContent('Failed to save consent.');
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalled());
   });

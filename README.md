@@ -48,11 +48,33 @@ npm run deploy
 - Installable on mobile devices
 - All app store metadata included
 
+Offline fallback
+- Visit `/offline` to see the offline status page used in-app.
+- The service worker uses `autoUpdate`; new versions install in the background and apply on next load.
+- Icons in `manifest.webmanifest` point to a placeholder SVG in development; replace with real PNG icons before store submission.
+
 ### Development
 ```bash
 npm install
 npm run dev
 ```
+
+Accessibility audit (optional)
+- To run a quick accessibility sweep in dev, enable the audit flag and reload:
+  - In `.env.local`: `VITE_A11Y_AUDIT=true`
+  - Or inline: `VITE_A11Y_AUDIT=true npm run dev`
+- The app loads `axe-core` from a CDN at runtime and logs violations to the console (collapsed group labeled `[a11y]`).
+
+Error telemetry (optional)
+- Disabled by default; enable explicitly via env if you want to send errors to a provider like Sentry.
+  - `.env.local`:
+    ```ini
+    VITE_TELEMETRY_ENABLED=true
+    VITE_SENTRY_DSN=<your-sentry-dsn>
+    VITE_RELEASE=v0.1.0
+    ```
+  - If `VITE_SENTRY_DSN` is present and telemetry is enabled, the app tries to lazy‑load `@sentry/browser` at runtime. If the package is not installed, it falls back to a no‑op.
+  - Global handlers for `window.onerror` and `unhandledrejection` are attached.
 
 #### Skipping SMS login during development
 
@@ -65,6 +87,22 @@ To surface the placeholder payments UI, add `VITE_PAYMENTS_ENABLED=true` to your
 npm run build        # Standard build
 npm run build:gh-pages  # GitHub Pages build with relative paths
 ```
+ 
+### Performance
+- Route‑level code splitting with `React.lazy` is enabled for major views (Admin, Portal, Auth). Initial bundle is smaller and routes load on demand.
+- Vite manualChunks groups common UI libs (Radix) and vendor code to improve caching.
+- Images are compressed client‑side before upload (defaults ~1600px, ~80% JPEG quality; form uses 1280px/72% by default).
+
+Bundle analysis (local)
+- Generate an interactive treemap report of the production bundle:
+  ```bash
+  npm run analyze
+  # open ./dist/bundle-report.html in your browser
+  ```
+  Notes:
+  - This uses `rollup-plugin-visualizer` if present. If you don’t have it installed yet, run:
+    `npm i -D rollup-plugin-visualizer`
+  - CI builds are unaffected; the report only generates when `ANALYZE=true`.
 
 ## Contributing
 
@@ -141,6 +179,10 @@ Use these steps to get the app talking to Supabase in development.
 ```bash
 npm run dev
 ```
+
+## Changelog
+
+- See the changelog for recent changes and release notes: [CHANGELOG.md](CHANGELOG.md)
 
 ## Architecture (Overview)
 
@@ -232,6 +274,30 @@ Implementation tip: The export function should verify admin status from the user
   - Use the service role only in functions; never expose it to the client.
   - The export function requires an authenticated user JWT with `role=admin`.
 
+### Payments (Stripe)
+
+- The `create-payment-session` function integrates with Stripe using REST.
+- Configure Function Secrets (Supabase → Functions → Secrets):
+  - `STRIPE_SECRET_KEY` (required)
+  - `STRIPE_MODE` = `payment` (default) or `subscription`
+  - `STRIPE_PRICE_ID` (preferred) or `STRIPE_AMOUNT_CENTS` and optional `STRIPE_CURRENCY` (default `usd`)
+  - `SUCCESS_URL` and `CANCEL_URL` (defaults point to example.com)
+- After setting secrets, redeploy:
+  - `supabase functions deploy create-payment-session`
+- Frontend toggle: enable payments UI via `VITE_PAYMENTS_ENABLED=true` in `.env.local` when ready.
+
+Dev testing without Stripe
+- You can exercise the full button → redirect flow without live Stripe by configuring the function to return a fake URL:
+  - In Supabase Function Secrets for `create-payment-session` set:
+    - `DEV_FAKE_CHECKOUT=true`
+    - (optional) `DEV_CHECKOUT_URL=http://localhost:8080/payment/success?mock=1`
+  - Redeploy the function. The app will navigate to the provided URL on “Pay invoice”.
+
+Notes:
+- If you see “You specified `payment` mode but passed a recurring price”, either:
+  - Switch to a one‑time price (create a Price without a recurring interval), or
+  - Set `STRIPE_MODE=subscription` and use a recurring `STRIPE_PRICE_ID`.
+
 Windows users: see CLI install via Scoop in `docs/CLI_SETUP_WINDOWS.md`.
 
 ### Quick Tester Script (PowerShell)
@@ -240,6 +306,49 @@ Windows users: see CLI install via Scoop in `docs/CLI_SETUP_WINDOWS.md`.
   - `pwsh scripts/test-functions.ps1 -Action save-consent`
   - Options: `-Action payment` or `-Action export -OutFile consent.csv`
   - Reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from `.env.local`/`env.local` if not supplied.
+
+## Storage (Media)
+
+Set up a bucket to store photos/videos.
+
+1) Create bucket
+- Supabase Dashboard → Storage → Create bucket
+- Name: `media`
+- Access: choose Public (simpler) or Private (more secure)
+
+2) Policies (if Private)
+- Enable RLS on `storage.objects` and add a read policy for authenticated users on the `media` bucket:
+
+  ```sql
+  -- Allow authenticated users to read objects from the 'media' bucket
+  create policy if not exists "auth read media"
+  on storage.objects for select
+  using (
+    bucket_id = 'media' and auth.role() = 'authenticated'
+  );
+
+  -- Allow authenticated users to upload into the 'media' bucket
+  create policy if not exists "auth upload media"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'media' and auth.role() = 'authenticated'
+  );
+  ```
+
+3) CORS (optional)
+- Storage → Settings → CORS: allow your app origin (e.g., `http://localhost:5173` and your prod origin) for `GET,PUT,POST` and headers `authorization,content-type`.
+
+4) Client usage
+- Public bucket: the app uses `getPublicUrl` (no auth needed); simplest for prototyping.
+- Private bucket: use signed URLs. The app includes `uploadMedia(file, { signed: true, expiresInSeconds: 3600 })`, which calls `createSignedUrl` after upload. Ensure users are authenticated and the above policies exist.
+
+5) Client-side compression (optional)
+- Large images are compressed before upload by default in the inspection form (to ~1600px max side, ~80% quality).
+- Utility: `compressImage(file, { maxWidth, maxHeight, quality })` in `src/lib/image.ts`.
+
+Notes
+- For stricter control, generate signed URLs via an Edge Function using the service role instead of the client.
+- Thumbnails: consider a tiny client-side compression step before upload or an Edge Function to generate thumbnails server-side.
 
 ## Security
 
@@ -252,3 +361,31 @@ Windows users: see CLI install via Scoop in `docs/CLI_SETUP_WINDOWS.md`.
 ## Release
 
 - See the release checklist: [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md)
+
+### Version Tagging
+
+When publishing a release:
+
+1. Update `CHANGELOG.md`
+   - Move items from “Unreleased” into a new version section like `## [vX.Y.Z] - YYYY-MM-DD`.
+   - Summarize any additional changes.
+2. Commit the changelog update
+   ```bash
+   git add CHANGELOG.md
+   git commit -m "docs(changelog): release vX.Y.Z"
+   ```
+3. Create an annotated tag and push it
+   ```bash
+   git tag -a vX.Y.Z -m "vX.Y.Z"
+   git push origin vX.Y.Z
+   ```
+   Or push all tags:
+   ```bash
+   git push --follow-tags
+   ```
+4. Create a GitHub Release (UI or CLI)
+   - UI: Draft a new release using tag `vX.Y.Z` and paste the changelog notes.
+   - CLI (optional):
+     ```bash
+     gh release create vX.Y.Z --generate-notes --title "vX.Y.Z"
+     ```

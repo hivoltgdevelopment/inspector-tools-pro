@@ -17,9 +17,20 @@ if (!SUPABASE_URL || !ANON_KEY || !SERVICE_ROLE_KEY) {
   );
 }
 
+function withCors(res: Response) {
+  const headers = new Headers(res.headers);
+  headers.set("Access-Control-Allow-Origin", "*");
+  headers.set("Access-Control-Allow-Headers", "authorization, x-client-info, apikey, content-type");
+  headers.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  return new Response(res.body, { status: res.status, headers });
+}
+
 serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return withCors(new Response(null, { status: 204 }));
+  }
   if (req.method !== "GET") {
-    return new Response("Method Not Allowed", { status: 405 });
+    return withCors(new Response("Method Not Allowed", { status: 405 }));
   }
 
   const authHeader = req.headers.get("Authorization") ?? "";
@@ -33,12 +44,12 @@ serve(async (req) => {
   });
   const { data: userData, error: userErr } = await userClient.auth.getUser();
   if (userErr || !userData?.user) {
-    return new Response("Unauthorized", { status: 401 });
+    return withCors(new Response("Unauthorized", { status: 401 }));
   }
 
   const role = (userData.user.user_metadata as { role?: string } | null | undefined)?.role;
   if (role !== "admin") {
-    return new Response("Forbidden", { status: 403 });
+    return withCors(new Response("Forbidden", { status: 403 }));
   }
 
   // Admin client for privileged read
@@ -49,7 +60,7 @@ serve(async (req) => {
     .order("created_at", { ascending: false });
 
   if (error) {
-    return new Response("Failed to fetch", { status: 500 });
+    return withCors(new Response("Failed to fetch", { status: 500 }));
   }
 
   const headers = [
@@ -71,14 +82,14 @@ serve(async (req) => {
     ),
   ].join("\n");
 
-  return new Response(csv, {
+  return withCors(new Response(csv, {
     status: 200,
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
       "Content-Disposition": "attachment; filename=consent-data.csv",
       "Cache-Control": "no-store",
     },
-  });
+  }));
 });
 
 function valueToString(v: unknown): string {

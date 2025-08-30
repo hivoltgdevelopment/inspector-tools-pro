@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
-import { isValidPhone } from '@/lib/phone';
+import { isValidPhone, toE164, normalizeToE164 } from '@/lib/phone';
 
 export default function SMSAuth() {
   const [phone, setPhone] = useState('');
@@ -11,20 +11,30 @@ export default function SMSAuth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const recordConsentAndSend = async () => {
+  const recordConsentAndSend = async (normalizedPhone: string) => {
     const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/save-sms-consent`;
     const res = await fetch(functionUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
       },
-      body: JSON.stringify({ phone, consent: true }),
+      body: JSON.stringify({ phone: normalizedPhone, consent: true }),
     });
     if (!res.ok) {
-      throw new Error('Failed to record consent');
+      let details = '';
+      try {
+        const data = await res.json();
+        details = (data && (data.error || data.message)) || '';
+      } catch (_err) {
+        if (import.meta.env.DEV) {
+          console.debug('[SMSAuth] non-JSON error response');
+        }
+      }
+      throw new Error(details ? `Failed to record consent: ${details}` : 'Failed to record consent');
     }
-    const { error } = await supabase.auth.signInWithOtp({ phone });
+    const { error } = await supabase.auth.signInWithOtp({ phone: normalizedPhone });
     if (error) {
       throw error;
     }
@@ -39,7 +49,8 @@ export default function SMSAuth() {
       toast.error(msg);
       return;
     }
-    if (!isValidPhone(phone)) {
+    const e164 = normalizeToE164(phone, '+1');
+    if (!e164) {
       const msg = 'Please enter a valid phone number in E.164 format.';
       setError(msg);
       toast.error(msg);
@@ -47,9 +58,12 @@ export default function SMSAuth() {
     }
     setLoading(true);
     try {
-      await recordConsentAndSend();
+      // Normalize immediately so subsequent calls use the same value
+      setPhone(e164);
+      await recordConsentAndSend(e164);
       setStage('otp');
       toast.success('Verification code sent.');
+      // keep normalized phone for follow-up verify
     } catch (err: unknown) {
       const message =
         err instanceof Error
@@ -67,7 +81,8 @@ export default function SMSAuth() {
     setError(null);
     setLoading(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({ phone, token: code, type: 'sms' });
+      const e164 = normalizeToE164(phone, '+1') || toE164(phone);
+      const { error } = await supabase.auth.verifyOtp({ phone: e164 || phone, token: code, type: 'sms' });
       if (error) {
         throw error;
       }
@@ -97,10 +112,14 @@ export default function SMSAuth() {
             type="tel"
             placeholder="Phone number"
             aria-label="Phone number"
+            aria-describedby="auth-phone-hint"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             className="w-full border rounded p-2"
           />
+          <p id="auth-phone-hint" className="text-xs text-gray-500">
+            Example: +1 555 123 4567
+          </p>
           <label className="flex items-center space-x-2 text-sm">
             <input
               type="checkbox"

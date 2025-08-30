@@ -67,3 +67,4 @@ describe('ClientPortal UX', () => {
     ).toBeInTheDocument();
   });
 });
+

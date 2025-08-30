@@ -17,16 +17,27 @@ if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
 
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
+function withCors(res: Response) {
+  const headers = new Headers(res.headers);
+  headers.set("Access-Control-Allow-Origin", "*");
+  headers.set("Access-Control-Allow-Headers", "authorization, x-client-info, apikey, content-type");
+  headers.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  return new Response(res.body, { status: res.status, headers });
+}
+
 serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return withCors(new Response(null, { status: 204 }));
+  }
   if (req.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
+    return withCors(new Response("Method Not Allowed", { status: 405 }));
   }
 
   let body: unknown;
   try {
     body = await req.json();
   } catch {
-    return json({ error: "Invalid JSON" }, 400);
+    return withCors(json({ error: "Invalid JSON" }, 400));
   }
 
   const b = body as Record<string, unknown>;
@@ -35,10 +46,10 @@ serve(async (req) => {
   const consent = b?.consent as boolean | undefined;
 
   if (typeof phone !== "string" || !/^\+[1-9]\d{1,14}$/.test(phone)) {
-    return json({ error: "Invalid phone (E.164 required)" }, 400);
+    return withCors(json({ error: "Invalid phone (E.164 required)" }, 400));
   }
   if (consent !== true) {
-    return json({ error: "consent must be true" }, 400);
+    return withCors(json({ error: "consent must be true" }, 400));
   }
 
   // Basic metadata (don't rely on x-forwarded-for for strong auth; it's best-effort)
@@ -54,10 +65,10 @@ serve(async (req) => {
   });
 
   if (error) {
-    return json({ error: error.message }, 500);
+    return withCors(json({ error: error.message }, 500));
   }
 
-  return json({ ok: true }, 200);
+  return withCors(json({ ok: true }, 200));
 });
 
 function json(data: unknown, status = 200) {

@@ -12,8 +12,8 @@ export default function NotAuthorized() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-16 p-6 bg-white rounded shadow text-center space-y-4">
-      <h1 className="text-2xl font-bold">Not Authorized</h1>
+    <div className="max-w-md mx-auto mt-16 p-6 bg-white rounded shadow text-center space-y-4" data-testid="notauth-container">
+      <h1 className="text-2xl font-bold" data-testid="notauth-heading">Not Authorized</h1>
       <p className="text-gray-700">
         You don’t have permission to access this page with your current role.
       </p>
@@ -21,12 +21,14 @@ export default function NotAuthorized() {
         <Link
           to="/portal"
           className="px-4 py-2 rounded bg-blue-600 text-white"
+          data-testid="notauth-portal-link"
         >
           Go to Client Portal
         </Link>
         <button
           onClick={handleSignOut}
           className="px-4 py-2 rounded border"
+          data-testid="notauth-signout"
         >
           Sign out
         </button>
@@ -37,4 +39,3 @@ export default function NotAuthorized() {
     </div>
   );
 }
-
