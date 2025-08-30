@@ -137,24 +137,26 @@ export async function gotoPortal(
   await page.goto(`/portal${query ? `?${query}` : ''}`);
 }
 
-export async function gotoAdminConsent(page: Page, opts?: { rbacOff?: boolean }) {
+export async function gotoAdminConsent(page: Page, opts?: { rbacOff?: boolean; authOff?: boolean }) {
   const params = new URLSearchParams();
   if (opts?.rbacOff !== false) params.set('rbac', 'off');
+  if (opts?.authOff !== false) params.set('auth', 'off');
   const query = params.toString();
   await page.goto(`/admin/consent${query ? `?${query}` : ''}`);
 }
 
 export async function gotoNotAuthorized(page: Page) {
-  await page.goto('/not-authorized');
+  await page.goto('/not-authorized?auth=off');
 }
 
 export async function gotoPaymentResult(page: Page, kind: 'success' | 'cancel') {
-  await page.goto(`/payment/${kind}`);
+  await page.goto(`/payment/${kind}?auth=off`);
 }
 
-export async function gotoHome(page: Page, opts?: { rbacOff?: boolean }) {
+export async function gotoHome(page: Page, opts?: { rbacOff?: boolean; authOff?: boolean }) {
   const params = new URLSearchParams();
   if (opts?.rbacOff) params.set('rbac', 'off');
+  if (opts?.authOff !== false) params.set('auth', 'off');
   const query = params.toString();
   await page.goto(`/${query ? `?${query}` : ''}`);
 }
