@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { gotoNotAuthorized, gotoPaymentResult, gotoPortal } from './utils';
 
 test.describe('Static routes', () => {
   test('Not Authorized screen renders with actions', async ({ page }) => {
-    await page.goto('/not-authorized');
+    await gotoNotAuthorized(page);
     await expect(page.getByTestId('notauth-container')).toBeVisible();
     await expect(page.getByTestId('notauth-heading')).toHaveText('Not Authorized');
     await expect(page.getByTestId('notauth-portal-link')).toBeVisible();
@@ -15,7 +16,7 @@ test.describe('Static routes', () => {
   });
 
   test('Payment result screens (success and cancel)', async ({ page }) => {
-    await page.goto('/payment/success');
+    await gotoPaymentResult(page, 'success');
     await expect(page.getByTestId('payment-container')).toBeVisible();
     await expect(page.getByTestId('payment-heading')).toHaveText('Payment Successful');
     await expect(page.getByTestId('payment-back-home')).toBeVisible();
@@ -25,7 +26,7 @@ test.describe('Static routes', () => {
     await page.getByTestId('payment-back-home').click();
     await expect(page).toHaveURL(/\/$/);
     // Go to cancel page and click portal link
-    await page.goto('/payment/cancel');
+    await gotoPaymentResult(page, 'cancel');
     
     await expect(page.getByTestId('payment-heading')).toHaveText('Payment Canceled');
     await expect(page.getByTestId('payment-back-home')).toBeVisible();

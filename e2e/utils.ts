@@ -143,6 +143,14 @@ export async function gotoAdminConsent(page: Page, opts?: { rbacOff?: boolean })
   await page.goto(`/admin/consent${query ? `?${query}` : ''}`);
 }
 
+export async function gotoNotAuthorized(page: Page) {
+  await page.goto('/not-authorized');
+}
+
+export async function gotoPaymentResult(page: Page, kind: 'success' | 'cancel') {
+  await page.goto(`/payment/${kind}`);
+}
+
 export async function stubSaveSmsConsentSuccess(page: Page) {
   await page.route('**/functions/v1/save-sms-consent', async (route) => {
     const req = route.request();
