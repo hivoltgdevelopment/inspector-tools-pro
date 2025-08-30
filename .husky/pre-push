@@ -1,0 +1,3 @@
+#!/bin/sh
+# Quick pre-push verification. Keep fast to avoid blocking pushes unnecessarily.
+npm run check

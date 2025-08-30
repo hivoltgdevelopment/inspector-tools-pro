@@ -217,6 +217,8 @@ This creates `.husky/_` internals. The repo already contains `.husky/pre-commit`
 Notes:
 - Keep `check` fast (no full browser runs). For full E2E, run targeted specs locally.
 
+We also ship a `pre-push` hook that runs the same quick check. You can remove or adjust hooks to fit your workflow.
+
 Helpers and patterns:
 
 - Navigation helpers (from `e2e/utils.ts`):
